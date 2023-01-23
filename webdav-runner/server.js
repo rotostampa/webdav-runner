@@ -169,13 +169,13 @@ export default config => {
       cert: read_file(get_config(config, "webdav", "ssl_cert")),
     },
     maxRequestDepth: Infinity,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods":
-        "HEAD, GET, PUT, PROPFIND, DELETE, OPTIONS, MKCOL, MOVE, COPY",
-      "Access-Control-Allow-Headers":
-        "Accept, Authorization, Content-Type, Content-Length, Depth",
-    },
+    //headers: {
+    //  "Access-Control-Allow-Origin": "*",
+    //  "Access-Control-Allow-Methods":
+    //    "HEAD, GET, PUT, PROPFIND, DELETE, OPTIONS, MKCOL, MOVE, COPY",
+    //  "Access-Control-Allow-Headers":
+    //    "Accept, Authorization, Content-Type, Content-Length, Depth",
+    //},
   }
 
   const server = new webdav.WebDAVServer(settings)
@@ -281,9 +281,11 @@ export default config => {
   }
 
   app.use((req, res, next) => {
-    for (const [key, value] of Object.entries(settings.headers)) {
-      res.set(key, value)
-    }
+
+    res.set("Access-Control-Allow-Origin", "*")
+    res.set("Access-Control-Allow-Methods", "HEAD, GET, PUT, PROPFIND, DELETE, OPTIONS, MKCOL, MOVE, COPY")
+    res.set("Access-Control-Allow-Headers", "Accept, Authorization, Content-Type, Content-Length, Depth")
+
     next()
   })
   app.use(webdav.extensions.express("/", server))
