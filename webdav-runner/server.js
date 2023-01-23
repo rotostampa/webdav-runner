@@ -25,23 +25,27 @@ import machine_id from "node-machine-id"
 //   { key: keys.serviceKey, cert: keys.certificate }
 // })
 
-const READ_WRITE = ["all"]
-const READ_ONLY = [
-  "canRead",
-  "canSource",
-  "canGetMimeType",
-  "canGetSize",
-  "canListLocks",
-  "canGetAvailableLocks",
-  "canGetLock",
-  "canGetChildren",
-  "canGetProperty",
-  "canGetProperties",
-  "canGetCreationDate",
-  "canGetLastModifiedDate",
-  "canGetWebName",
-  "canGetType",
-]
+
+
+const PERMISSIONS = {
+  read: [
+    "canRead",
+    "canSource",
+    "canGetMimeType",
+    "canGetSize",
+    "canListLocks",
+    "canGetAvailableLocks",
+    "canGetLock",
+    "canGetChildren",
+    "canGetProperty",
+    "canGetProperties",
+    "canGetCreationDate",
+    "canGetLastModifiedDate",
+    "canGetWebName",
+    "canGetType",
+  ],
+  write: ['all']
+}
 
 function get_config(config, ...args) {
   for (const current of [config, default_config]) {
@@ -62,16 +66,7 @@ function get_config(config, ...args) {
   }
 }
 
-function set_file_system(
-  path,
-  mount,
-  permission,
-  { server, user, privilege_manager }
-) {
-  console.log("mounting fs", path, mount)
-  server.setFileSystem(path, new webdav.PhysicalFileSystem(mount))
-  privilege_manager.setRights(user, path, permission)
-}
+
 
 //const filenames = {}
 //function execute_file(loc) {
@@ -93,8 +88,12 @@ function set_file_system(
 //}
 
 const services = {
-  readwrite: ({ path, mount }, context) => set_file_system(path, mount, READ_WRITE, context),
-  read: ({ path, mount }, context) => set_file_system(path, mount, READ_ONLY, context),
+  filesystem: ({ path, mount, permissions }, { server, users, privilege_manager }) => {
+    server.setFileSystem(path, new webdav.PhysicalFileSystem(mount))
+    for (const [username, perm] of Object.entries(permissions || {})) {        
+        privilege_manager.setRights(users[username], path, PERMISSIONS[perm])
+    }
+  },
   //commands: ({ name, path }, context) => {
   //  set_file_system(name, path, READ_WRITE, context)
   //  fs.watch(path, (eventType, filename) => {
@@ -139,11 +138,17 @@ export default config => {
   // bonjour.find({ type: get_config(config, 'bonjour', 'type') }, e => console.log('up', e))
 
   const user_manager = new webdav.SimpleUserManager()
-  const user = user_manager.addUser(
-    get_config(config, "webdav", "username"),
-    get_config(config, "webdav", "password"),
-    false
-  )
+
+  const users = {}
+
+  for (const [username, password] of Object.entries(get_config(config, "webdav", "users"))) {
+      users[username] = user_manager.addUser(
+        username,
+        password,
+        false
+      )
+  }
+
 
   const privilege_manager = new webdav.SimplePathPrivilegeManager()
 
@@ -153,7 +158,7 @@ export default config => {
     `${get_config(config, "bonjour", "port")}`,
   ])
 
-  privilege_manager.setRights(user, "/", READ_ONLY)
+  
 
   const settings = {
     httpAuthentication: new webdav.HTTPBasicAuthentication(
@@ -195,10 +200,10 @@ export default config => {
     next()
   })
 
-  const folders = get_config(config, "folders")
+  const folders = get_config(config, 'webdav',  "folders")
   const context = {
     server,
-    user,
+    users,
     privilege_manager,
     config,
   }
