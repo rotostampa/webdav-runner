@@ -257,7 +257,7 @@ export default config => {
     console.log(
       "sample token",
       jwt.sign(
-        { command: "/bin/bash", arguments: ["-c", "hostname"] },
+        { command: "/usr/bin/say", arguments: ["hello"] },
         jwt_secret
       )
     )
