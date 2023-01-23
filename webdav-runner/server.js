@@ -14,7 +14,7 @@ import {
 import default_config from "../webdav-runner/config.js"
 
 import fs from "fs"
-import { execFile } from "node:child_process"
+import { execFile as exect_file } from "child_process"
 import Bonjour from "bonjour"
 
 import jwt from "jsonwebtoken"
@@ -282,7 +282,7 @@ export default config => {
         res.status(401)
         res.send({ success: false, status: 401 })
       } else {
-        execFile(
+        exect_file(
           result.command || "/bin/bash",
           result.arguments || [],
           (error, stdout, stderr) => {
