@@ -37,7 +37,7 @@ export const write_file = (loc, data) => {
   return target
 }
 export const read_json = loc => JSON.loads(read_file(loc))
-export const write_json = (loc, data) => write_file(loc, JSON.stringify(data))
+export const write_json = (loc, data) => write_file(loc, JSON.stringify(data, null, 4))
 
 export const startswith = (str, prefix) => {
   return str && str.indexOf(prefix) === 0
