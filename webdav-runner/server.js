@@ -19,33 +19,7 @@ import { execFile } from "node:child_process"
 import Bonjour from "bonjour"
 import { v4 as uuidv4 } from "uuid"
 
-//    'all'
-//    | 'canCreate'
-//    | 'canDelete'
-//    | 'canMove'
-//    | 'canRename'
-//    | 'canAppend'
-//    | 'canWrite'
-//    | 'canRead'
-//    | 'canSource'
-//    | 'canGetMimeType'
-//    | 'canGetSize'
-//    | 'canListLocks'
-//    | 'canSetLock'
-//    | 'canRemoveLock'
-//    | 'canGetAvailableLocks'
-//    | 'canGetLock'
-//    | 'canAddChild'
-//    | 'canRemoveChild'
-//    | 'canGetChildren'
-//    | 'canSetProperty'
-//    | 'canGetProperty'
-//    | 'canGetProperties'
-//    | 'canRemoveProperty'
-//    | 'canGetCreationDate'
-//    | 'canGetLastModifiedDate'
-//    | 'canGetWebName'
-//    | 'canGetType';
+
 
 const READ_WRITE = ["all"]
 const READ_ONLY = [
@@ -91,9 +65,7 @@ function set_file_system(
   { server, user, privilege_manager }
 ) {
   console.log("mounting fs", name, path)
-
   server.setFileSystem(name, new webdav.PhysicalFileSystem(path))
-
   privilege_manager.setRights(user, name, permission)
 }
 
@@ -144,7 +116,7 @@ const services = {
     Bonjour().find(
       { type: get_config(context.config, "bonjour", "type") },
       e => {
-        delete e.rawText
+        delete e.rawTxt
         write_json([path, `${e.name}.json`], e)
       }
     )
@@ -248,7 +220,7 @@ export default config => {
   }
   set_file_system(
     "/manifest.json",
-    write_json([temp, `config.json`], folders),
+    write_json([temp, "config.json"], Object.values(folders)),
     READ_ONLY,
     context
   )
