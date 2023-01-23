@@ -18,7 +18,7 @@ import { execFile } from "node:child_process"
 import Bonjour from "bonjour"
 
 import jwt from "jsonwebtoken"
-import machine_id from 'node-machine-id';
+import machine_id from "node-machine-id"
 
 // var pem = require('pem')
 // pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
@@ -94,10 +94,10 @@ function set_file_system(
 
 const services = {
   readwrite: ({ path, mount }, context) => {
-    set_file_system(path, mount , READ_WRITE, context)
+    set_file_system(path, mount, READ_WRITE, context)
   },
-  read: ({ path, mount  }, context) => {
-    set_file_system(path, mount , READ_ONLY, context)
+  read: ({ path, mount }, context) => {
+    set_file_system(path, mount, READ_ONLY, context)
   },
   //commands: ({ name, path }, context) => {
   //  set_file_system(name, path, READ_WRITE, context)
@@ -122,7 +122,9 @@ const services = {
 
 function bonjour_advertise(config) {
   const settings = {
-    name: get_config(config, "bonjour", "name") || machine_id.machineIdSync({original:true}),
+    name:
+      get_config(config, "bonjour", "name") ||
+      machine_id.machineIdSync({ original: true }),
     type: get_config(config, "bonjour", "type"),
     port: get_config(config, "bonjour", "port"),
     subtypes: [process.platform],
@@ -286,5 +288,9 @@ export default config => {
   })
   app.use(webdav.extensions.express("/", server))
 
-  https.createServer(settings.https, app).listen(settings.port, () => console.log("Express server listening on port " + settings.port))
+  https
+    .createServer(settings.https, app)
+    .listen(settings.port, () =>
+      console.log("Express server listening on port " + settings.port)
+    )
 }
