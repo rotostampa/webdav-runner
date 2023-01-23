@@ -11,17 +11,16 @@ export default {
     port: 1923,
     type: "webdav-server",
   },
+  commands: {
+    secret: 'my-super-secret'
+  },
   folders: [
     {
-      name: '/commands',
-      type: "commands",
-      tags: ["commands"],
-      cleanup: true
-    }, {
       name: '/outfolders',
       path: "~/Storage",
       type: "readwrite",
-      tags: ["session"]
+      tags: ["session"],
+      cleanup: false
     }
   ]
 }

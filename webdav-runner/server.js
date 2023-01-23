@@ -1,5 +1,6 @@
 import { v2 as webdav } from "webdav-server"
 import express from "express"
+import https from "https"
 
 import {
   expand_path,
@@ -7,19 +8,22 @@ import {
   ensure_dir,
   write_json,
   startswith,
+  json_loads,
+  json_dumps,
 } from "../webdav-runner/utils.js"
 import default_config from "../webdav-runner/config.js"
 
 import fs from "fs"
-// var pem = require('pem')
-// pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
-//   { key: keys.serviceKey, cert: keys.certificate }
-// })
 import { execFile } from "node:child_process"
 import Bonjour from "bonjour"
 import { v4 as uuidv4 } from "uuid"
 
+import jwt from "jsonwebtoken"
 
+// var pem = require('pem')
+// pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
+//   { key: keys.serviceKey, cert: keys.certificate }
+// })
 
 const READ_WRITE = ["all"]
 const READ_ONLY = [
@@ -69,74 +73,66 @@ function set_file_system(
   privilege_manager.setRights(user, name, permission)
 }
 
-const filenames = {}
-
-function execute_file(loc) {
-  const file = expand_path(loc)
-
-  if (!filenames[file]) {
-    filenames[file] = file
-
-    execFile("/bin/bash", [file], (error, stdout, stderr) => {
-      if (error) {
-        console.log("error", file, error)
-      }
-      console.log("stdout", file, stdout)
-      console.log("stderr", file, stderr)
-
-      if (fs.existsSync(file)) {
-        fs.rmSync(file)
-      }
-
-      delete filenames[file]
-    })
-  }
-}
+//const filenames = {}
+//function execute_file(loc) {
+//  const file = expand_path(loc)
+//  if (!filenames[file]) {
+//    filenames[file] = file
+//    execFile("/bin/bash", [file], (error, stdout, stderr) => {
+//      if (error) {
+//        console.log("error", file, error)
+//      }
+//      console.log("stdout", file, stdout)
+//      console.log("stderr", file, stderr)
+//      if (fs.existsSync(file)) {
+//        fs.rmSync(file)
+//      }
+//      delete filenames[file]
+//    })
+//  }
+//}
 
 const services = {
   readwrite: ({ name, path }, context) => {
-    set_file_system(`/${name}`, path, READ_WRITE, context)
+    set_file_system(name, path, READ_WRITE, context)
   },
   read: ({ name, path }, context) => {
-    set_file_system(`/${name}`, path, READ_ONLY, context)
+    set_file_system(name, path, READ_ONLY, context)
   },
-  commands: ({ name, path }, context) => {
-    set_file_system(`/${name}`, path, READ_WRITE, context)
-
-    fs.watch(path, (eventType, filename) => {
-      console.log("changed", eventType, filename)
-
-      if (!startswith(filename, ".")) {
-        execute_file([path, filename])
-      }
-    })
-  },
-  bonjour: ({ name, path }, context) => {
-    set_file_system(`/${name}`, path, READ_ONLY, context)
-    Bonjour().find(
-      { type: get_config(context.config, "bonjour", "type") },
-      e => {
-        delete e.rawTxt
-        write_json([path, `${e.name}.json`], e)
-      }
-    )
-  },
+  //commands: ({ name, path }, context) => {
+  //  set_file_system(name, path, READ_WRITE, context)
+  //  fs.watch(path, (eventType, filename) => {
+  //    console.log("changed", eventType, filename)
+  //    if (!startswith(filename, ".")) {
+  //      execute_file([path, filename])
+  //    }
+  //  })
+  //},
+  //bonjour: ({ name, path }, context) => {
+  //  set_file_system(`/${name}`, path, READ_ONLY, context)
+  //  Bonjour().find(
+  //    { type: get_config(context.config, "bonjour", "type") },
+  //    e => {
+  //      delete e.rawTxt
+  //      write_json([path, `${e.name}.json`], e)
+  //    }
+  //  )
+  //},
 }
 
-function bonjour(config) {
+function bonjour_advertise(config) {
   const settings = {
     name: get_config(config, "bonjour", "name") || uuidv4(),
     type: get_config(config, "bonjour", "type"),
     port: get_config(config, "bonjour", "port"),
+    subtypes: [process.platform],
   }
-
-  console.log("starting bonjour using", settings)
 
   Bonjour().publish(settings)
 }
 
 export default config => {
-  bonjour(config)
+  bonjour_advertise(config)
 
   // bonjour.find({ type: get_config(config, 'bonjour', 'type') }, e => console.log('up', e))
 
@@ -150,14 +146,14 @@ export default config => {
   const privilege_manager = new webdav.SimplePathPrivilegeManager()
 
   const temp = ensure_dir([
-      get_config(config, 'storage'), 
-      `${get_config(config, "webdav", "port")}`, 
-      `${get_config(config, "bonjour", "port")}`
-    ])
+    get_config(config, "storage"),
+    `${get_config(config, "webdav", "port")}`,
+    `${get_config(config, "bonjour", "port")}`,
+  ])
 
   privilege_manager.setRights(user, "/", READ_ONLY)
 
-  const server = new webdav.WebDAVServer({
+  const settings = {
     httpAuthentication: new webdav.HTTPBasicAuthentication(
       user_manager,
       "realm"
@@ -178,7 +174,9 @@ export default config => {
       "Access-Control-Allow-Headers":
         "Accept, Authorization, Content-Type, Content-Length, Depth",
     },
-  })
+  }
+
+  const server = new webdav.WebDAVServer(settings)
 
   server.afterRequest((arg, next) => {
     // Display the method, the URI, the returned status code and the returned message
@@ -203,41 +201,91 @@ export default config => {
     config,
   }
 
-  for (const [name, settings] of Object.entries(folders)) {
-    settings.name = name
+  for (const settings of folders) {
     if (!settings.type) {
-      settings.type = 'read'
+      settings.type = "read"
     }
     if (!settings.tags) {
       settings.tags = [settings.type]
     }
 
-    settings.path = ensure_dir(settings.path ? settings.path : [temp, name], settings.cleanup)
+    settings.path = ensure_dir(
+      settings.path ? settings.path : [temp, settings.name.replace("/", "-")],
+      settings.cleanup
+    )
 
     services[settings.type](settings, context)
 
     delete settings.path
     delete settings.name
   }
+
+  const servers = {}
+
+  Bonjour().find({ type: get_config(context.config, "bonjour", "type") }, e => {
+    delete e.rawTxt
+    servers[e.name] = e
+  })
+
   set_file_system(
     "/manifest.json",
-    write_json([temp, "config.json"], {platform: process.platform, folders: folders}),
+    write_json([temp, "config.json"], {
+      platform: process.platform,
+      folders: folders,
+    }),
     READ_ONLY,
     context
   )
-  server.start()
-}
 
-//const app = express()
-//app.use((req, res, next) => {
-//  console.log(req.method, req.url, req.headers)
-//  res.set("Access-Control-Allow-Origin", "*")
-//  res.set("Access-Control-Allow-Methods", "*")
-//  res.set("Access-Control-Allow-Headers", "*")
-//  res.set("Access-Control-Allow-Credentials", "true")
-//  res.set("Access-Control-expose-headers", "*")
-//  res.set("Access-Control-request-headers", "*")
-//  next()
-//})
-//app.use(webdav.extensions.express("/", server))
-//app.listen(config.port) // Start the Express server
+  const app = express()
+  app.get("/manifest", (req, res) => {
+    res.send({ platform: process.platform, folders, servers })
+  })
+
+  const jwt_secret = get_config(config, "commands", "secret")
+
+  if (jwt_secret) {
+    console.log(
+      "sample token",
+      jwt.sign(
+        { command: "/bin/bash", arguments: ["-c", "hostname"] },
+        jwt_secret
+      )
+    )
+
+    app.get("/commands/:jwt", (req, res) => {
+      let result
+      try {
+        result = jwt.verify(req.params.jwt, jwt_secret)
+      } catch (e) {}
+
+      if (!result) {
+        res.status(401)
+        res.send({ ok: false })
+      } else {
+        execFile(
+          result.command || "/bin/bash",
+          result.arguments || [],
+          (error, stdout, stderr) => {
+            if (error) {
+              console.log("error", error)
+            }
+            console.log("stdout", stdout)
+            console.log("stderr", stderr)
+          }
+        )
+        res.send({ ok: true, ...result })
+      }
+    })
+  }
+
+  app.use((req, res, next) => {
+    for (const [key, value] of Object.entries(settings.headers)) {
+      res.set(key, value)
+    }
+    next()
+  })
+  app.use(webdav.extensions.express("/", server))
+
+  https.createServer(settings.https, app).listen(settings.port, () => console.log("Express server listening on port " + settings.port))
+}
