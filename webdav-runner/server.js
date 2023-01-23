@@ -123,7 +123,7 @@ function bonjour_advertise(config) {
       machine_id.machineIdSync({ original: true }),
     type: get_config(config, "bonjour", "type"),
     port: get_config(config, "bonjour", "port"),
-    subtypes: [process.platform],
+    txt: {platform: process.platform}
   }
 
   Bonjour().publish(settings)
@@ -133,6 +133,8 @@ function bonjour_advertise(config) {
 
 export default config => {
   const bonjour = bonjour_advertise(config)
+
+  console.log('started bonjour using', bonjour)
 
   // bonjour.find({ type: get_config(config, 'bonjour', 'type') }, e => console.log('up', e))
 
