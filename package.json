@@ -1,7 +1,7 @@
 {
   "name": "webdav-runner",
   "preferGlobal": "true",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "description": "webdav server with bonjour and command integrations",
   "type": "module",
   "main": "./webdav-runner/cli.js",

@@ -1,4 +1,5 @@
 export default {
+  storage: '~/.webdav-server',
   webdav: {
     port: 1922,
     username: "admin",
@@ -14,15 +15,17 @@ export default {
     outfolders: {
       path: "~/Storage",
       type: "readwrite",
-      tags: ["session"],
+      tags: ["session"]
     },
     commands: {
       type: "commands",
       tags: ["commands"],
+      cleanup: true
     },
     bonjour: {
       type: "bonjour",
       tags: ["bonjour"],
+      cleanup: true
     },
   },
 }

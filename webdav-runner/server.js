@@ -44,7 +44,7 @@ function get_config(config, ...args) {
     let result = current
 
     loop: for (const key of args) {
-      if (result && result[key]) {
+      if (result && typeof result[key] !== "undefined") {
         result = result[key]
       } else {
         result = null
@@ -149,7 +149,11 @@ export default config => {
 
   const privilege_manager = new webdav.SimplePathPrivilegeManager()
 
-  const temp = ensure_dir(["../temp", `${get_config(config, "webdav", "port")}`, `${get_config(config, "bonjour", "port")}`], true)
+  const temp = ensure_dir([
+      get_config(config, 'storage'), 
+      `${get_config(config, "webdav", "port")}`, 
+      `${get_config(config, "bonjour", "port")}`
+    ])
 
   privilege_manager.setRights(user, "/", READ_ONLY)
 
@@ -208,9 +212,7 @@ export default config => {
       settings.tags = [settings.type]
     }
 
-    settings.path = settings.path
-      ? expand_path(settings.path)
-      : ensure_dir([temp, name])
+    settings.path = ensure_dir(settings.path ? settings.path : [temp, name], settings.cleanup)
 
     services[settings.type](settings, context)
 
