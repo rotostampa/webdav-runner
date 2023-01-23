@@ -218,7 +218,8 @@ export default config => {
 
     services[settings.type](settings, context)
 
-    delete settings.path
+    delete settings.mount
+    delete settings.cleanup
   }
 
   const servers = {}
@@ -238,7 +239,16 @@ export default config => {
   //  context
   //)
 
+
   const app = express()
+
+  app.use((req, res, next) => {
+    res.set("Access-Control-Allow-Origin", "*")
+    res.set("Access-Control-Allow-Methods", "HEAD, GET, PUT, PROPFIND, DELETE, OPTIONS, MKCOL, MOVE, COPY")
+    res.set("Access-Control-Allow-Headers", "Accept, Authorization, Content-Type, Content-Length, Depth")
+    next()
+  })
+
   app.get("/manifest", (req, res) => {
     res.send({ platform: process.platform, folders, servers })
   })
@@ -255,6 +265,8 @@ export default config => {
     )
 
     app.get("/commands/:jwt", (req, res) => {
+
+
       let result
       try {
         result = jwt.verify(req.params.jwt, jwt_secret)
@@ -280,14 +292,7 @@ export default config => {
     })
   }
 
-  app.use((req, res, next) => {
 
-    res.set("Access-Control-Allow-Origin", "*")
-    res.set("Access-Control-Allow-Methods", "HEAD, GET, PUT, PROPFIND, DELETE, OPTIONS, MKCOL, MOVE, COPY")
-    res.set("Access-Control-Allow-Headers", "Accept, Authorization, Content-Type, Content-Length, Depth")
-
-    next()
-  })
   app.use(webdav.extensions.express("/", server))
 
   https
