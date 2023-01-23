@@ -1,7 +1,7 @@
 {
   "name": "webdav-runner",
   "preferGlobal": "true",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "webdav server with bonjour and command integrations",
   "type": "module",
   "main": "./webdav-runner/cli.js",
@@ -12,7 +12,7 @@
     "help": "node ./webdav-runner/cli.js help",
     "server": "node ./webdav-runner/cli.js server"
   },
-  "author": "",
+  "author": "riccardo di virgilio",
   "license": "ISC",
   "dependencies": {
     "bonjour": "^3.5.0",
