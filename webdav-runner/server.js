@@ -200,9 +200,7 @@ export default config => {
   }
 
   for (const [name, settings] of Object.entries(folders)) {
-    if (!settings.name) {
-      settings.name = name
-    }
+    settings.name = name
     if (!settings.type) {
       settings.type = 'read'
     }
@@ -217,10 +215,11 @@ export default config => {
     services[settings.type](settings, context)
 
     delete settings.path
+    delete settings.name
   }
   set_file_system(
     "/manifest.json",
-    write_json([temp, "config.json"], Object.values(folders)),
+    write_json([temp, "config.json"], {platform: process.platform, folders: folders}),
     READ_ONLY,
     context
   )
