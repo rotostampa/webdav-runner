@@ -30,14 +30,17 @@ export const ensure_dir = (dir, del) => {
   return folder
 }
 
+export const json_loads = s => JSON.parse(s)
+export const json_dumps = s => JSON.stringify(s, null, 4)
+
 export const read_file = loc => fs.readFileSync(expand_path(loc)).toString()
 export const write_file = (loc, data) => {
   const target = expand_path(loc)
   fs.writeFileSync(target, data)
   return target
 }
-export const read_json = loc => JSON.loads(read_file(loc))
-export const write_json = (loc, data) => write_file(loc, JSON.stringify(data, null, 4))
+export const read_json = loc => json_loads(read_file(loc))
+export const write_json = (loc, data) => write_file(loc, json_dumps(data))
 
 export const startswith = (str, prefix) => {
   return str && str.indexOf(prefix) === 0
