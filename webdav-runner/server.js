@@ -250,7 +250,7 @@ export default config => {
   })
 
   app.get("/manifest", (req, res) => {
-    res.send({ platform: process.platform, name: bonjour.name, folders, servers })
+    res.send({ success: true, status: 200, platform: process.platform, name: bonjour.name, folders, servers })
   })
 
   const jwt_secret = get_config(config, "execute", "secret")
@@ -274,7 +274,7 @@ export default config => {
 
       if (!result) {
         res.status(401)
-        res.send({ ok: false })
+        res.send({ success: false, status: 401 })
       } else {
         execFile(
           result.command || "/bin/bash",
@@ -287,7 +287,7 @@ export default config => {
             console.log("stderr", stderr)
           }
         )
-        res.send({ ok: true, ...result })
+        res.send({ success: true, status: 200, ...result })
       }
     })
   }
