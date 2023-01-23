@@ -63,14 +63,14 @@ function get_config(config, ...args) {
 }
 
 function set_file_system(
-  name,
   path,
+  mount,
   permission,
   { server, user, privilege_manager }
 ) {
-  console.log("mounting fs", name, path)
-  server.setFileSystem(name, new webdav.PhysicalFileSystem(path))
-  privilege_manager.setRights(user, name, permission)
+  console.log("mounting fs", path, mount)
+  server.setFileSystem(path, new webdav.PhysicalFileSystem(mount))
+  privilege_manager.setRights(user, path, permission)
 }
 
 //const filenames = {}
@@ -93,11 +93,11 @@ function set_file_system(
 //}
 
 const services = {
-  readwrite: ({ name, path }, context) => {
-    set_file_system(name, path, READ_WRITE, context)
+  readwrite: ({ path, mount }, context) => {
+    set_file_system(path, mount , READ_WRITE, context)
   },
-  read: ({ name, path }, context) => {
-    set_file_system(name, path, READ_ONLY, context)
+  read: ({ path, mount  }, context) => {
+    set_file_system(path, mount , READ_ONLY, context)
   },
   //commands: ({ name, path }, context) => {
   //  set_file_system(name, path, READ_WRITE, context)
@@ -209,15 +209,14 @@ export default config => {
       settings.tags = [settings.type]
     }
 
-    settings.path = ensure_dir(
-      settings.path ? settings.path : [temp, settings.name.replace("/", "-")],
+    settings.mount = ensure_dir(
+      settings.mount ? settings.mount : [temp, settings.path.replace("/", "-")],
       settings.cleanup
     )
 
     services[settings.type](settings, context)
 
     delete settings.path
-    delete settings.name
   }
 
   const servers = {}

@@ -16,8 +16,8 @@ export default {
   },
   folders: [
     {
-      name: '/',
-      path: "~/Storage",
+      path: '/',
+      mount: "~/Storage",
       type: "readwrite",
       tags: ["session"],
       cleanup: false
