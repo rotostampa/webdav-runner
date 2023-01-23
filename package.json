@@ -2,10 +2,12 @@
   "name": "webdav-runner",
   "preferGlobal": "true",
   "version": "1.0.8",
-  "description": "",
-  "main": "./webdav-runner/cli.js",
-  "bin":{"webdav-runner":"./bin/cli.js"},
+  "description": "webdav server with bonjour and command integrations",
   "type": "module",
+  "main": "./webdav-runner/cli.js",
+  "bin": {
+    "webdav-runner": "./bin/cli.js"
+  },
   "scripts": {
     "help": "node ./webdav-runner/cli.js help",
     "server": "node ./webdav-runner/cli.js server"
