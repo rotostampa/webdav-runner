@@ -131,10 +131,12 @@ function bonjour_advertise(config) {
   }
 
   Bonjour().publish(settings)
+
+  return settings
 }
 
 export default config => {
-  bonjour_advertise(config)
+  const bonjour = bonjour_advertise(config)
 
   // bonjour.find({ type: get_config(config, 'bonjour', 'type') }, e => console.log('up', e))
 
@@ -250,10 +252,10 @@ export default config => {
   })
 
   app.get("/manifest", (req, res) => {
-    res.send({ platform: process.platform, folders, servers })
+    res.send({ platform: process.platform, name: bonjour.name, folders, servers })
   })
 
-  const jwt_secret = get_config(config, "commands", "secret")
+  const jwt_secret = get_config(config, "execute", "secret")
 
   if (jwt_secret) {
     console.log(
@@ -264,7 +266,7 @@ export default config => {
       )
     )
 
-    app.get("/commands/:jwt", (req, res) => {
+    app.get("/execute/:jwt", (req, res) => {
 
 
       let result

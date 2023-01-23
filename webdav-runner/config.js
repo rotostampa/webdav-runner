@@ -11,7 +11,7 @@ export default {
     port: 1923,
     type: "webdav-server",
   },
-  commands: {
+  execute: {
     secret: 'my-super-secret'
   },
   folders: [
