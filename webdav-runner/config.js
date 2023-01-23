@@ -16,7 +16,7 @@ export default {
   },
   folders: [
     {
-      name: '/outfolders',
+      name: '/',
       path: "~/Storage",
       type: "readwrite",
       tags: ["session"],

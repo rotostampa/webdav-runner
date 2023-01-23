@@ -19,8 +19,8 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
     "minimist": "^1.2.7",
+    "node-machine-id": "^1.1.12",
     "pem": "^1.14.6",
-    "uuid": "^9.0.0",
     "webdav-server": "^2.6.2"
   }
 }

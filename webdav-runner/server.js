@@ -16,9 +16,9 @@ import default_config from "../webdav-runner/config.js"
 import fs from "fs"
 import { execFile } from "node:child_process"
 import Bonjour from "bonjour"
-import { v4 as uuidv4 } from "uuid"
 
 import jwt from "jsonwebtoken"
+import machine_id from 'node-machine-id';
 
 // var pem = require('pem')
 // pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
@@ -122,7 +122,7 @@ const services = {
 
 function bonjour_advertise(config) {
   const settings = {
-    name: get_config(config, "bonjour", "name") || uuidv4(),
+    name: get_config(config, "bonjour", "name") || machine_id.machineIdSync({original:true}),
     type: get_config(config, "bonjour", "type"),
     port: get_config(config, "bonjour", "port"),
     subtypes: [process.platform],
@@ -227,15 +227,15 @@ export default config => {
     servers[e.name] = e
   })
 
-  set_file_system(
-    "/manifest.json",
-    write_json([temp, "config.json"], {
-      platform: process.platform,
-      folders: folders,
-    }),
-    READ_ONLY,
-    context
-  )
+  //set_file_system(
+  //  "/manifest.json",
+  //  write_json([temp, "config.json"], {
+  //    platform: process.platform,
+  //    folders: folders,
+  //  }),
+  //  READ_ONLY,
+  //  context
+  //)
 
   const app = express()
   app.get("/manifest", (req, res) => {
