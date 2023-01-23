@@ -1,7 +1,7 @@
 export default {
   storage: '~/.webdav-server',
   webdav: {
-    port: 1922,
+    port: 1900,
     username: "admin",
     password: "admin",
     ssl_key: "../certs/self-signed.key.pem",
