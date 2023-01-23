@@ -2,6 +2,9 @@ import fs from "fs"
 import url from "url"
 import path from "path"
 
+import default_config from "../webdav-runner/config.js"
+
+
 const homedir =
   process.env[process.platform == "win32" ? "USERPROFILE" : "HOME"]
 
@@ -44,4 +47,24 @@ export const write_json = (loc, data) => write_file(loc, json_dumps(data))
 
 export const startswith = (str, prefix) => {
   return str && str.indexOf(prefix) === 0
+}
+
+
+export const get_config = (config, ...args) => {
+  for (const current of [config, default_config]) {
+    let result = current
+
+    loop: for (const key of args) {
+      if (result && typeof result[key] !== "undefined") {
+        result = result[key]
+      } else {
+        result = null
+        break loop
+      }
+    }
+
+    if (result) {
+      return result
+    }
+  }
 }

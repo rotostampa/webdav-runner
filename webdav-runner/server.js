@@ -3,15 +3,15 @@ import express from "express"
 import https from "https"
 
 import {
-  expand_path,
-  read_file,
   ensure_dir,
-  write_json,
-  startswith,
-  json_loads,
+  expand_path,
+  get_config,
   json_dumps,
+  json_loads,
+  read_file,
+  startswith,
+  write_json,
 } from "../webdav-runner/utils.js"
-import default_config from "../webdav-runner/config.js"
 
 import fs from "fs"
 import { execFile as exect_file } from "child_process"
@@ -45,24 +45,7 @@ const PERMISSIONS = {
   write: ["all"],
 }
 
-function get_config(config, ...args) {
-  for (const current of [config, default_config]) {
-    let result = current
 
-    loop: for (const key of args) {
-      if (result && typeof result[key] !== "undefined") {
-        result = result[key]
-      } else {
-        result = null
-        break loop
-      }
-    }
-
-    if (result) {
-      return result
-    }
-  }
-}
 
 //const filenames = {}
 //function execute_file(loc) {
@@ -83,7 +66,7 @@ function get_config(config, ...args) {
 //  }
 //}
 
-const services = {
+const SERVICES = {
   filesystem: (
     { path, mount, permissions },
     { server, users, privilege_manager }
@@ -179,20 +162,6 @@ export default config => {
 
   const server = new webdav.WebDAVServer(settings)
 
-  server.afterRequest((arg, next) => {
-    // Display the method, the URI, the returned status code and the returned message
-    console.log(
-      ">>",
-      arg.request.method,
-      arg.requested.uri,
-      ">",
-      arg.response.statusCode,
-      arg.response.statusMessage
-    )
-    // If available, display the body of the response
-    //console.log(arg.responseBody);
-    next()
-  })
 
   const folders = get_config(config, "webdav", "folders")
   const context = {
@@ -204,7 +173,7 @@ export default config => {
 
   for (const settings of folders) {
     if (!settings.type) {
-      settings.type = "read"
+      settings.type = "filesystem"
     }
     if (!settings.tags) {
       settings.tags = [settings.type]
@@ -215,7 +184,7 @@ export default config => {
       settings.cleanup
     )
 
-    services[settings.type](settings, context)
+    SERVICES[settings.type](settings, context)
 
     delete settings.mount
     delete settings.cleanup
@@ -241,6 +210,11 @@ export default config => {
   const app = express()
 
   app.use((req, res, next) => {
+
+
+
+
+
     res.set("Access-Control-Allow-Origin", "*")
     res.set(
       "Access-Control-Allow-Methods",
@@ -251,6 +225,15 @@ export default config => {
       "Accept, Authorization, Content-Type, Content-Length, Depth"
     )
     next()
+
+
+    console.log(
+      req.method,
+      req.path,
+      "→",
+      res.statusCode,
+    )
+
   })
 
   app.get("/manifest", (req, res) => {
