@@ -149,7 +149,7 @@ export default config => {
 
   const privilege_manager = new webdav.SimplePathPrivilegeManager()
 
-  const temp = ensure_dir(["../temp", uuidv4()])
+  const temp = ensure_dir(["../temp", `service-${get_config(config, "webdav", "port")}-${get_config(config, "bonjour", "port")}`], true)
 
   privilege_manager.setRights(user, "/", READ_ONLY)
 
@@ -212,7 +212,7 @@ export default config => {
 
     settings.path = settings.path
       ? expand_path(settings.path)
-      : ensure_dir([temp, uuidv4()])
+      : ensure_dir([temp, name])
 
     services[settings.type](settings, context)
 
