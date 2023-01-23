@@ -11,21 +11,17 @@ export default {
     port: 1923,
     type: "webdav-server",
   },
-  folders: {
-    outfolders: {
-      path: "~/Storage",
-      type: "readwrite",
-      tags: ["session"]
-    },
-    commands: {
+  folders: [
+    {
+      name: '/commands',
       type: "commands",
       tags: ["commands"],
       cleanup: true
-    },
-    bonjour: {
-      type: "bonjour",
-      tags: ["bonjour"],
-      cleanup: true
-    },
-  },
+    }, {
+      name: '/outfolders',
+      path: "~/Storage",
+      type: "readwrite",
+      tags: ["session"]
+    }
+  ]
 }
