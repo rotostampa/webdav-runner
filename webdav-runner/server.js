@@ -93,12 +93,8 @@ function set_file_system(
 //}
 
 const services = {
-  readwrite: ({ path, mount }, context) => {
-    set_file_system(path, mount, READ_WRITE, context)
-  },
-  read: ({ path, mount }, context) => {
-    set_file_system(path, mount, READ_ONLY, context)
-  },
+  readwrite: ({ path, mount }, context) => set_file_system(path, mount, READ_WRITE, context),
+  read: ({ path, mount }, context) => set_file_system(path, mount, READ_ONLY, context),
   //commands: ({ name, path }, context) => {
   //  set_file_system(name, path, READ_WRITE, context)
   //  fs.watch(path, (eventType, filename) => {
