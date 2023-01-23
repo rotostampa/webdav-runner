@@ -149,7 +149,7 @@ export default config => {
 
   const privilege_manager = new webdav.SimplePathPrivilegeManager()
 
-  const temp = ensure_dir(["../temp", `service-${get_config(config, "webdav", "port")}-${get_config(config, "bonjour", "port")}`], true)
+  const temp = ensure_dir(["../temp", `${get_config(config, "webdav", "port")}`, `${get_config(config, "bonjour", "port")}`], true)
 
   privilege_manager.setRights(user, "/", READ_ONLY)
 
