@@ -186,7 +186,6 @@ export default config => {
 
     SERVICES[settings.type](settings, context)
 
-    delete settings.mount
     delete settings.cleanup
   }
 
