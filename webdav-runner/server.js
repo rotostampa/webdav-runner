@@ -25,8 +25,6 @@ import machine_id from "node-machine-id"
 //   { key: keys.serviceKey, cert: keys.certificate }
 // })
 
-
-
 const PERMISSIONS = {
   read: [
     "canRead",
@@ -44,7 +42,7 @@ const PERMISSIONS = {
     "canGetWebName",
     "canGetType",
   ],
-  write: ['all']
+  write: ["all"],
 }
 
 function get_config(config, ...args) {
@@ -66,8 +64,6 @@ function get_config(config, ...args) {
   }
 }
 
-
-
 //const filenames = {}
 //function execute_file(loc) {
 //  const file = expand_path(loc)
@@ -88,10 +84,13 @@ function get_config(config, ...args) {
 //}
 
 const services = {
-  filesystem: ({ path, mount, permissions }, { server, users, privilege_manager }) => {
+  filesystem: (
+    { path, mount, permissions },
+    { server, users, privilege_manager }
+  ) => {
     server.setFileSystem(path, new webdav.PhysicalFileSystem(mount))
-    for (const [username, perm] of Object.entries(permissions || {})) {        
-        privilege_manager.setRights(users[username], path, PERMISSIONS[perm])
+    for (const [username, perm] of Object.entries(permissions || {})) {
+      privilege_manager.setRights(users[username], path, PERMISSIONS[perm])
     }
   },
   //commands: ({ name, path }, context) => {
@@ -122,7 +121,7 @@ function bonjour_advertise(config) {
       machine_id.machineIdSync({ original: true }),
     type: get_config(config, "bonjour", "type"),
     port: get_config(config, "bonjour", "port"),
-    txt: {platform: process.platform}
+    txt: { platform: process.platform },
   }
 
   Bonjour().publish(settings)
@@ -133,7 +132,7 @@ function bonjour_advertise(config) {
 export default config => {
   const bonjour = bonjour_advertise(config)
 
-  console.log('started bonjour using', bonjour)
+  console.log("started bonjour using", bonjour)
 
   // bonjour.find({ type: get_config(config, 'bonjour', 'type') }, e => console.log('up', e))
 
@@ -141,14 +140,11 @@ export default config => {
 
   const users = {}
 
-  for (const [username, password] of Object.entries(get_config(config, "webdav", "users"))) {
-      users[username] = user_manager.addUser(
-        username,
-        password,
-        false
-      )
+  for (const [username, password] of Object.entries(
+    get_config(config, "webdav", "users")
+  )) {
+    users[username] = user_manager.addUser(username, password, false)
   }
-
 
   const privilege_manager = new webdav.SimplePathPrivilegeManager()
 
@@ -157,8 +153,6 @@ export default config => {
     `${get_config(config, "webdav", "port")}`,
     `${get_config(config, "bonjour", "port")}`,
   ])
-
-  
 
   const settings = {
     httpAuthentication: new webdav.HTTPBasicAuthentication(
@@ -200,7 +194,7 @@ export default config => {
     next()
   })
 
-  const folders = get_config(config, 'webdav',  "folders")
+  const folders = get_config(config, "webdav", "folders")
   const context = {
     server,
     users,
@@ -244,18 +238,30 @@ export default config => {
   //  context
   //)
 
-
   const app = express()
 
   app.use((req, res, next) => {
     res.set("Access-Control-Allow-Origin", "*")
-    res.set("Access-Control-Allow-Methods", "HEAD, GET, PUT, PROPFIND, DELETE, OPTIONS, MKCOL, MOVE, COPY")
-    res.set("Access-Control-Allow-Headers", "Accept, Authorization, Content-Type, Content-Length, Depth")
+    res.set(
+      "Access-Control-Allow-Methods",
+      "HEAD, GET, PUT, PROPFIND, DELETE, OPTIONS, MKCOL, MOVE, COPY"
+    )
+    res.set(
+      "Access-Control-Allow-Headers",
+      "Accept, Authorization, Content-Type, Content-Length, Depth"
+    )
     next()
   })
 
   app.get("/manifest", (req, res) => {
-    res.send({ success: true, status: 200, platform: process.platform, name: bonjour.name, folders, servers })
+    res.send({
+      success: true,
+      status: 200,
+      platform: process.platform,
+      name: bonjour.name,
+      folders,
+      servers,
+    })
   })
 
   const jwt_secret = get_config(config, "execute", "secret")
@@ -263,15 +269,10 @@ export default config => {
   if (jwt_secret) {
     console.log(
       "sample token",
-      jwt.sign(
-        { command: "/usr/bin/say", arguments: ["hello"] },
-        jwt_secret
-      )
+      jwt.sign({ command: "/usr/bin/say", arguments: ["hello"] }, jwt_secret)
     )
 
     app.get("/execute/:jwt", (req, res) => {
-
-
       let result
       try {
         result = jwt.verify(req.params.jwt, jwt_secret)
@@ -296,7 +297,6 @@ export default config => {
       }
     })
   }
-
 
   app.use(webdav.extensions.express("/", server))
 
