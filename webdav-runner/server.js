@@ -218,7 +218,7 @@ export default config => {
     proxydomain = "." + proxydomain
   }
   const proxyprefix = get_config(config, 'proxy', 'prefix')
-  const proxy = httpproxy.createProxyServer({secure: false, ignorePath: true}); // See (†)
+  const proxy = httpproxy.createProxyServer({secure: get_config(config, 'proxy', 'secure'), ignorePath: true}); // See (†)
 
   app.use((req, res, next) => {
 

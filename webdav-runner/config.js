@@ -25,12 +25,14 @@ export default {
   bonjour: {
     port: 1923,
     type: "webdav-runner",
+    name: null
   },
   execute: {
     secret: "my-super-secret",
   },
   proxy: {
     domain: 'localtest.me',
-    prefix: 'webdav-runner-'
+    prefix: 'webdav-runner-',
+    secure: false
   }
 }
