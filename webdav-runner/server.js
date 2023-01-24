@@ -196,6 +196,7 @@ export default config => {
 
   Bonjour().find({ type: get_config(context.config, "bonjour", "type") }, e => {
     delete e.rawTxt
+    e.proxy = `/proxy/${e.name}/`
     servers[e.name] = e
   })
 
@@ -252,16 +253,16 @@ export default config => {
 
 
   const proxy = httpproxy.createProxyServer({secure: false, ignorePath: true}); // See (†)
-  const selfproxy = webdav.extensions.express("/proxy/-self-/", server)
+  const selfproxy = webdav.extensions.express(`/proxy/${bonjour.name}/`, server)
 
   app.all("/proxy/:name/*", (req, res, next) => {
 
-    if (req.params.name == '-self-') {
+    if (req.params.name == bonjour.name) {
       return selfproxy(req, res, next)
     }
     const target = servers[req.params.name]
     if (target) {
-      const url = `https://${target.addresses[0]}:${target.txt.port}/proxy/-self-/${req.params[0]}`
+      const url = `https://${target.referer.address}:${target.txt.port}/proxy/${req.params.name}/${req.params[0]}`
       console.log('forwarding to', url)
       proxy.web(req, res, { target: url }, e => {
         res.status(502)
