@@ -1,8 +1,7 @@
-import fs from "fs"
-import url from "url"
-import path from "path"
-
 import default_config from "../webdav-runner/config.js"
+import fs from "fs"
+import path from "path"
+import url from "url"
 
 const homedir =
     process.env[process.platform == "win32" ? "USERPROFILE" : "HOME"]

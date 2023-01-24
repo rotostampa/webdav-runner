@@ -1,4 +1,4 @@
-import minimist from "minimist"
+import { ensure_certs } from "../webdav-runner/certs.js"
 import default_config from "../webdav-runner/config.js"
 import server from "../webdav-runner/server.js"
 import {
@@ -9,10 +9,10 @@ import {
     expand_path,
     write_json,
 } from "../webdav-runner/utils.js"
-import fs from "fs"
-import path from "path"
-import { ensure_certs } from "../webdav-runner/certs.js"
 import { execFile as exec_file } from "child_process"
+import fs from "fs"
+import minimist from "minimist"
+import path from "path"
 
 const default_config_location = expand_path([
     get_config({}, "storage"),
