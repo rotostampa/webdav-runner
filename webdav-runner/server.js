@@ -197,8 +197,11 @@ export default config => {
 
   Bonjour().find({ type: get_config(context.config, "bonjour", "type") }, e => {
     delete e.rawTxt
-    e.proxy = `https://${proxyprefix}${e.name}${proxydomain}:${e.txt.port}/`
-    servers[e.name] = e
+    servers[e.name] = {
+      proxy: `https://${proxyprefix}${e.name}${proxydomain}:${e.txt.port}/`,
+      port: e.txt.port,
+      address: e.referer.address
+    }
   })
 
   //set_file_system(
@@ -239,10 +242,10 @@ export default config => {
       const target = servers[proxyname]
 
 
-      if (target && target.name == bonjour.name) {
+      if (target && proxyname == bonjour.name) {
         console.log('proxy to self, skipping')
       } else if (target) {
-        const url = `https://${target.referer.address}:${target.txt.port}${req.path}`
+        const url = `https://${target.address}:${target.port}${req.path}`
         console.log('forwarding to', url)
         proxy.web(req, res, { target: url }, e => {
           res.status(502)
