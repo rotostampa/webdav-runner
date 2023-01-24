@@ -167,7 +167,7 @@ export default config => {
     }
     const proxyprefix = get_config(config, "proxy", "prefix")
     const proxy = httpproxy.createProxyServer({
-        secure: get_config(config, "proxy", "secure"),
+        secure: get_config(config, "proxy", "secure") ? true : false,
         ignorePath: true,
     }) // See (†)
 
