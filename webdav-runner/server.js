@@ -252,15 +252,20 @@ export default config => {
 
 
   const proxy = httpproxy.createProxyServer({secure: false, ignorePath: true}); // See (†)
+  const selfproxy = webdav.extensions.express("/proxy/-self-/", server)
 
-  app.all("/proxy/:name/*", (req, res) => {
+  app.all("/proxy/:name/*", (req, res, next) => {
 
+    if (req.params.name == '-self-') {
+      return selfproxy(req, res, next)
+    }
     const target = servers[req.params.name]
-
     if (target) {
-      proxy.web(req, res, { target: `https://${target.host}:${target.txt.port}/${req.params[0]}` }, e => {
+      const url = `https://${target.addresses[0]}:${target.txt.port}/proxy/-self-/${req.params[0]}`
+      console.log('forwarding to', url)
+      proxy.web(req, res, { target: url }, e => {
         res.status(502)
-        res.send({ success: false, status: 502, error: `${e}` })
+        res.send({ success: false, status: 502, error: `${e}`, url: url })
       });
     } else {
       res.status(404)
