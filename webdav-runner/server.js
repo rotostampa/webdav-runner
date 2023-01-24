@@ -235,6 +235,7 @@ export default config => {
       "Accept, Authorization, Content-Type, Content-Length, Depth"
     )
 
+    // proxy logic
     if (endswith(req.socket.servername, proxydomain) && startswith(req.socket.servername, proxyprefix)) {
 
       const proxyname = req.socket.servername.slice(proxyprefix.length, - proxydomain.length)
