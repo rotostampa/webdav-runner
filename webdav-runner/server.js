@@ -232,8 +232,6 @@ export default config => {
       "Accept, Authorization, Content-Type, Content-Length, Depth"
     )
 
-    console.log(req.socket.servername, startswith(req.socket.servername, proxyprefix))
-
     if (endswith(req.socket.servername, proxydomain) && startswith(req.socket.servername, proxyprefix)) {
 
       const proxyname = req.socket.servername.slice(proxyprefix.length, - proxydomain.length)
