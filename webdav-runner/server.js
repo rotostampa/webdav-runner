@@ -1,5 +1,8 @@
 import { v2 as webdav } from "webdav-server"
 import express from "express"
+import httpproxy from 'http-proxy'
+
+
 import https from "https"
 
 import {
@@ -104,7 +107,7 @@ function bonjour_advertise(config) {
       machine_id.machineIdSync({ original: true }),
     type: get_config(config, "bonjour", "type"),
     port: get_config(config, "bonjour", "port"),
-    txt: { platform: process.platform },
+    txt: { platform: process.platform, port: get_config(config, 'webdav', 'port') },
   }
 
   Bonjour().publish(settings)
@@ -245,6 +248,25 @@ export default config => {
       folders,
       servers,
     })
+  })
+
+
+  const proxy = httpproxy.createProxyServer({secure: false, ignorePath: true}); // See (†)
+
+  app.all("/proxy/:name/*", (req, res) => {
+
+    const target = servers[req.params.name]
+
+    if (target) {
+      proxy.web(req, res, { target: `https://${target.host}:${target.txt.port}/${req.params[0]}` }, e => {
+        res.status(502)
+        res.send({ success: false, status: 502, error: `${e}` })
+      });
+    } else {
+      res.status(404)
+      res.send({ success: false, status: 404, servers: servers })
+    }
+
   })
 
   const jwt_secret = get_config(config, "execute", "secret")
