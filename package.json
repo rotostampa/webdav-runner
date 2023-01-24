@@ -11,7 +11,8 @@
   "scripts": {
     "help": "node ./webdav-runner/cli.js help",
     "server": "node ./webdav-runner/cli.js server",
-    "setup": "node ./webdav-runner/cli.js setup"
+    "setup": "node ./webdav-runner/cli.js setup",
+    "lint": "prettier webdav-runner --write --no-semi --tab-width 4 --arrow-parens avoid"
   },
   "author": "riccardo di virgilio",
   "license": "ISC",
@@ -24,5 +25,8 @@
     "node-machine-id": "^1.1.12",
     "pem": "^1.14.6",
     "webdav-server": "^2.6.2"
+  },
+  "devDependencies": {
+    "prettier": "^2.8.3"
   }
 }
