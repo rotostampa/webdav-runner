@@ -12,7 +12,7 @@
     "help": "node ./webdav-runner/cli.js help",
     "server": "node ./webdav-runner/cli.js server",
     "setup": "node ./webdav-runner/cli.js setup",
-    "lint": "prettier webdav-runner --write --no-semi --tab-width 4 --arrow-parens avoid"
+    "lint": "prettier ./webdav-runner --write --no-semi --tab-width 4 --arrow-parens avoid"
   },
   "author": "riccardo di virgilio",
   "license": "ISC",
