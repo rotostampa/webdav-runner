@@ -10,7 +10,8 @@
   },
   "scripts": {
     "help": "node ./webdav-runner/cli.js help",
-    "server": "node ./webdav-runner/cli.js server"
+    "server": "node ./webdav-runner/cli.js server",
+    "setup": "node ./webdav-runner/cli.js setup"
   },
   "author": "riccardo di virgilio",
   "license": "ISC",

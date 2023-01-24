@@ -131,7 +131,7 @@ export default config => {
 
   const privilege_manager = new webdav.SimplePathPrivilegeManager()
 
-  const temp = ensure_dir([
+  const temp = expand_path([
     get_config(config, "storage"),
     `${get_config(config, "webdav", "port")}`,
     `${get_config(config, "bonjour", "port")}`,
