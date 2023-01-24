@@ -1,5 +1,5 @@
 export default {
-  storage: "~/.webdav-server",
+  storage: "~/.webdav-runner",
   webdav: {
     port: 1900,
     ssl_key: "../certs/self-signed.key.pem",
@@ -24,7 +24,7 @@ export default {
   },
   bonjour: {
     port: 1923,
-    type: "webdav-server",
+    type: "webdav-runner",
   },
   execute: {
     secret: "my-super-secret",
