@@ -261,7 +261,7 @@ export default config => {
                     (error, stdout, stderr) => {
                         res.status(error ? 422 : 200)
                         res.send({
-                            success: true,
+                            success: error ? false : true,
                             status: error ? 422 : 200,
                             error,
                             stdout,
