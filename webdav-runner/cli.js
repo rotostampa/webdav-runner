@@ -1,9 +1,11 @@
 import minimist from "minimist"
 import default_config from "../webdav-runner/config.js"
 import server from "../webdav-runner/server.js"
-import { read_file, get_config, json_loads, expand_path, write_json } from "../webdav-runner/utils.js"
+import { read_file, get_config, json_loads, ensure_dir, expand_path, write_json } from "../webdav-runner/utils.js"
 import fs from 'fs'
+import path from 'path'
 import {ensure_certs} from "../webdav-runner/certs.js"
+import { execFile as exec_file } from "child_process"
 
 
 const default_config_location = expand_path([get_config({}, 'storage'), 'config.json'])
@@ -25,18 +27,33 @@ const load_config = args => {
 const argv = minimist(process.argv.slice(2))
 
 const subcommands = {
-  help: args => console.log(`available commands: ${Object.keys(subcommands)}`),
-  server: args => server(load_config(args)),
-  setup: args => {
-    const used_conf = load_config(args)
+  help: async args => console.log(`available commands: ${Object.keys(subcommands)}`),
+  server: async args => await server(load_config(args)),
+  setup: async args => {
+    let used_conf = load_config(args)
     if (! used_conf) {
       console.log('creating conf under', default_config_location)
-      write_json(default_config_location, default_config)
+
+      used_conf = {...default_config}
+      used_conf['webdav']['ssl_key'] = path.join(used_conf['storage'], 'certificate.key')
+      used_conf['webdav']['ssl_cert'] = path.join(used_conf['storage'], 'certificate.cert')
+
+      ensure_dir(used_conf['storage'])
+
+      write_json(default_config_location, used_conf)
     }
 
-    const certs = ensure_certs(used_conf)
+    const {cert} = await ensure_certs(used_conf)
 
-    console.log(certs)
+    // security add-trusted-cert certs/self-signed.cert.pem
+
+    if (process.platform == 'darwin') {
+      exec_file(
+        "/usr/bin/security",
+        ["add-trusted-cert", expand_path(cert)],
+      )
+    }
+
   }
 }
 
