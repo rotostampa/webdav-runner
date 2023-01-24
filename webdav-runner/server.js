@@ -256,7 +256,7 @@ export default config => {
             } else {
                 console.log("🚀 running", result.command, ...result.arguments)
                 exec_file(
-                    result.command || "/bin/bash",
+                    result.command || "/bin/hostname",
                     result.arguments || [],
                     (error, stdout, stderr) => {
                         res.status(error ? 422 : 200)
