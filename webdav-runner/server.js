@@ -2,17 +2,13 @@ import {
     ensure_dir,
     expand_path,
     get_config,
-    json_dumps,
-    json_loads,
     read_file,
     startswith,
     endswith,
-    write_json,
 } from "../webdav-runner/utils.js"
 import Bonjour from "bonjour"
 import { execFile as exec_file } from "child_process"
 import express from "express"
-import fs from "fs"
 import httpproxy from "http-proxy"
 import https from "https"
 import jwt from "jsonwebtoken"
@@ -250,7 +246,9 @@ export default config => {
             let result
             try {
                 result = jwt.verify(req.params.jwt, jwt_secret)
-            } catch (e) {}
+            } catch (e) {
+                console.log("invalid jwt", e)
+            }
 
             if (!result) {
                 res.status(401)

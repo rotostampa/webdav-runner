@@ -35,7 +35,7 @@ const load_config = args => {
 const argv = minimist(process.argv.slice(2))
 
 const subcommands = {
-    help: async args =>
+    help: async () =>
         console.log(`available commands: ${Object.keys(subcommands)}`),
     server: async args => await server(load_config(args)),
     setup: async args => {
