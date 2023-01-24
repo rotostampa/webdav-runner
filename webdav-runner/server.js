@@ -227,6 +227,7 @@ export default config => {
 
 
     console.log(
+      "🤖",
       req.method,
       req.path,
       "→",
@@ -249,10 +250,10 @@ export default config => {
   const jwt_secret = get_config(config, "execute", "secret")
 
   if (jwt_secret) {
-    console.log(
-      "sample token",
-      jwt.sign({ command: "/usr/bin/say", arguments: ["hello"] }, jwt_secret)
-    )
+    //console.log(
+    //  "sample token",
+    //  jwt.sign({ command: "/usr/bin/say", arguments: ["hello"] }, jwt_secret)
+    //)
 
     app.get("/execute/:jwt", (req, res) => {
       let result
@@ -264,15 +265,16 @@ export default config => {
         res.status(401)
         res.send({ success: false, status: 401 })
       } else {
+        console.log('🚀 running', result.command, ...result.arguments)
         exec_file(
           result.command || "/bin/bash",
           result.arguments || [],
           (error, stdout, stderr) => {
-            if (error) {
-              console.log("error", error)
+
+            for (const e of [error, stdout, stderr]) {
+              if (e) console.log(e)
             }
-            console.log("stdout", stdout)
-            console.log("stderr", stderr)
+
           }
         )
         res.send({ success: true, status: 200, ...result })
@@ -285,6 +287,6 @@ export default config => {
   https
     .createServer(settings.https, app)
     .listen(settings.port, () =>
-      console.log("Express server listening on port " + settings.port)
+      console.log("🥷 server listening on port " + settings.port)
     )
 }
