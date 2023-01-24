@@ -13,6 +13,7 @@ import {
   json_loads,
   read_file,
   startswith,
+  endswith,
   write_json,
 } from "../webdav-runner/utils.js"
 
@@ -196,7 +197,7 @@ export default config => {
 
   Bonjour().find({ type: get_config(context.config, "bonjour", "type") }, e => {
     delete e.rawTxt
-    e.proxy = `/proxy/${e.name}/`
+    e.proxy = `https://${proxyprefix}${e.name}${proxydomain}:${e.txt.port}/`
     servers[e.name] = e
   })
 
@@ -212,11 +213,14 @@ export default config => {
 
   const app = express()
 
+  let proxydomain = get_config(config, 'proxy', 'domain')
+  if (! startswith(proxydomain, '.')) {
+    proxydomain = "." + proxydomain
+  }
+  const proxyprefix = get_config(config, 'proxy', 'prefix')
+  const proxy = httpproxy.createProxyServer({secure: false, ignorePath: true}); // See (†)
+
   app.use((req, res, next) => {
-
-
-
-
 
     res.set("Access-Control-Allow-Origin", "*")
     res.set(
@@ -227,13 +231,41 @@ export default config => {
       "Access-Control-Allow-Headers",
       "Accept, Authorization, Content-Type, Content-Length, Depth"
     )
+
+    console.log(req.socket.servername, startswith(req.socket.servername, proxyprefix))
+
+    if (endswith(req.socket.servername, proxydomain) && startswith(req.socket.servername, proxyprefix)) {
+
+      const proxyname = req.socket.servername.slice(proxyprefix.length, - proxydomain.length)
+
+      const target = servers[proxyname]
+
+
+      if (target.name == bonjour.name) {
+        console.log('proxy to self, skipping')
+      } else if (target) {
+        const url = `https://${target.referer.address}:${target.txt.port}${req.path}`
+        console.log('forwarding to', url)
+        proxy.web(req, res, { target: url }, e => {
+          res.status(502)
+          res.send({ success: false, status: 502, error: `${e}`, url: url })
+        });
+        return
+
+      } else {
+        res.status(404)
+        res.send({ success: false, status: 404, servers: servers })
+        return
+      }
+    }
+
     next()
 
 
     console.log(
       "🤖",
       req.method,
-      req.path,
+      `${req.socket.servername}${req.path}`,
       "→",
       res.statusCode,
     )
@@ -252,28 +284,22 @@ export default config => {
   })
 
 
-  const proxy = httpproxy.createProxyServer({secure: false, ignorePath: true}); // See (†)
-  const selfproxy = webdav.extensions.express(`/proxy/${bonjour.name}/`, server)
+  
 
-  app.all("/proxy/:name/*", (req, res, next) => {
 
-    if (req.params.name == bonjour.name) {
-      return selfproxy(req, res, next)
-    }
-    const target = servers[req.params.name]
-    if (target) {
-      const url = `https://${target.referer.address}:${target.txt.port}/proxy/${req.params.name}/${req.params[0]}`
-      console.log('forwarding to', url)
-      proxy.web(req, res, { target: url }, e => {
-        res.status(502)
-        res.send({ success: false, status: 502, error: `${e}`, url: url })
-      });
-    } else {
-      res.status(404)
-      res.send({ success: false, status: 404, servers: servers })
-    }
 
+  app.get("/manifest", (req, res) => {
+    res.send({
+      success: true,
+      status: 200,
+      platform: process.platform,
+      name: bonjour.name,
+      folders,
+      servers,
+    })
   })
+
+
 
   const jwt_secret = get_config(config, "execute", "secret")
 

@@ -29,4 +29,8 @@ export default {
   execute: {
     secret: "my-super-secret",
   },
+  proxy: {
+    domain: 'localtest.me',
+    prefix: 'webdav-runner-'
+  }
 }

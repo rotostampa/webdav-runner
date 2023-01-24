@@ -48,7 +48,9 @@ export const write_json = (loc, data) => write_file(loc, json_dumps(data))
 export const startswith = (str, prefix) => {
   return str && str.indexOf(prefix) === 0
 }
-
+export const endswith = (str, suffix) => {
+    return str.indexOf(suffix, str.length - suffix.length) !== -1
+}
 
 export const get_config = (config, ...args) => {
   for (const current of [config, default_config]) {
