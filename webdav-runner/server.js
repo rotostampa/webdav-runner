@@ -339,6 +339,6 @@ export default config => {
   https
     .createServer(settings.https, app)
     .listen(settings.port, () =>
-      console.log("🥷 server listening on port " + settings.port)
+      console.log(`🥷 server listening on https://localhost:${settings.port}/`)
     )
 }
