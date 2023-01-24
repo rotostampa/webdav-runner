@@ -24,11 +24,6 @@ import Bonjour from "bonjour"
 import jwt from "jsonwebtoken"
 import machine_id from "node-machine-id"
 
-// var pem = require('pem')
-// pem.createCertificate({ days: 1, selfSigned: true }, function (err, keys) {
-//   { key: keys.serviceKey, cert: keys.certificate }
-// })
-
 const PERMISSIONS = {
   read: [
     "canRead",
@@ -49,27 +44,6 @@ const PERMISSIONS = {
   write: ["all"],
 }
 
-
-
-//const filenames = {}
-//function execute_file(loc) {
-//  const file = expand_path(loc)
-//  if (!filenames[file]) {
-//    filenames[file] = file
-//    execFile("/bin/bash", [file], (error, stdout, stderr) => {
-//      if (error) {
-//        console.log("error", file, error)
-//      }
-//      console.log("stdout", file, stdout)
-//      console.log("stderr", file, stderr)
-//      if (fs.existsSync(file)) {
-//        fs.rmSync(file)
-//      }
-//      delete filenames[file]
-//    })
-//  }
-//}
-
 const SERVICES = {
   filesystem: (
     { path, mount, permissions },
@@ -80,25 +54,6 @@ const SERVICES = {
       privilege_manager.setRights(users[username], path, PERMISSIONS[perm])
     }
   },
-  //commands: ({ name, path }, context) => {
-  //  set_file_system(name, path, READ_WRITE, context)
-  //  fs.watch(path, (eventType, filename) => {
-  //    console.log("changed", eventType, filename)
-  //    if (!startswith(filename, ".")) {
-  //      execute_file([path, filename])
-  //    }
-  //  })
-  //},
-  //bonjour: ({ name, path }, context) => {
-  //  set_file_system(`/${name}`, path, READ_ONLY, context)
-  //  Bonjour().find(
-  //    { type: get_config(context.config, "bonjour", "type") },
-  //    e => {
-  //      delete e.rawTxt
-  //      write_json([path, `${e.name}.json`], e)
-  //    }
-  //  )
-  //},
 }
 
 function bonjour_advertise(config) {
@@ -120,8 +75,6 @@ export default config => {
   const bonjour = bonjour_advertise(config)
 
   console.log("started bonjour using", bonjour)
-
-  // bonjour.find({ type: get_config(config, 'bonjour', 'type') }, e => console.log('up', e))
 
   const user_manager = new webdav.SimpleUserManager()
 
@@ -204,16 +157,6 @@ export default config => {
     }
   })
 
-  //set_file_system(
-  //  "/manifest.json",
-  //  write_json([temp, "config.json"], {
-  //    platform: process.platform,
-  //    folders: folders,
-  //  }),
-  //  READ_ONLY,
-  //  context
-  //)
-
   const app = express()
 
   let proxydomain = get_config(config, 'proxy', 'domain')
@@ -286,6 +229,7 @@ export default config => {
   const jwt_secret = get_config(config, "execute", "secret")
 
   if (jwt_secret) {
+
     //console.log("sample jwt request")
     //console.log(`curl https://localhost:${settings.port}/execute/${jwt.sign({ command: "/usr/bin/say", arguments: ["hello"] }, jwt_secret)}/ --insecure`)
 
