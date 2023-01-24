@@ -239,7 +239,7 @@ export default config => {
       const target = servers[proxyname]
 
 
-      if (target.name == bonjour.name) {
+      if (target && target.name == bonjour.name) {
         console.log('proxy to self, skipping')
       } else if (target) {
         const url = `https://${target.referer.address}:${target.txt.port}${req.path}`
