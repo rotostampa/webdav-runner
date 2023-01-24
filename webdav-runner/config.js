@@ -32,7 +32,7 @@ export default {
   },
   proxy: {
     domain: 'localtest.me',
-    prefix: 'webdav-runner-',
+    prefix: 'webdav-',
     secure: false
   }
 }
