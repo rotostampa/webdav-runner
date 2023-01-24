@@ -199,8 +199,8 @@ export default config => {
     delete e.rawTxt
     servers[e.name] = {
       proxy: `https://${proxyprefix}${e.name}${proxydomain}:${e.txt.port}/`,
-      port: e.txt.port,
-      address: e.referer.address
+      address: e.referer.address,
+      ...e.txt
     }
   })
 
