@@ -266,9 +266,7 @@ export default config => {
     console.log(
       "🤖",
       req.method,
-      `${req.socket.servername}${req.path}`,
-      "→",
-      res.statusCode,
+      `https://${req.socket.servername}:${settings.port}${req.path}`,
     )
 
   })
@@ -305,10 +303,8 @@ export default config => {
   const jwt_secret = get_config(config, "execute", "secret")
 
   if (jwt_secret) {
-    //console.log(
-    //  "sample token",
-    //  jwt.sign({ command: "/usr/bin/say", arguments: ["hello"] }, jwt_secret)
-    //)
+    //console.log("sample jwt request")
+    //console.log(`curl https://localhost:${settings.port}/execute/${jwt.sign({ command: "/usr/bin/say", arguments: ["hello"] }, jwt_secret)}/ --insecure`)
 
     app.get("/execute/:jwt", (req, res) => {
       let result
@@ -325,14 +321,10 @@ export default config => {
           result.command || "/bin/bash",
           result.arguments || [],
           (error, stdout, stderr) => {
-
-            for (const e of [error, stdout, stderr]) {
-              if (e) console.log(e)
-            }
-
+            res.status(error ? 422 : 200)
+            res.send({ success: true, status: error ? 422 : 200, error, stdout, stderr })
           }
         )
-        res.send({ success: true, status: 200, ...result })
       }
     })
   }
