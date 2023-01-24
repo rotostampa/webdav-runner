@@ -282,24 +282,6 @@ export default config => {
     })
   })
 
-
-  
-
-
-
-  app.get("/manifest", (req, res) => {
-    res.send({
-      success: true,
-      status: 200,
-      platform: process.platform,
-      name: bonjour.name,
-      folders,
-      servers,
-    })
-  })
-
-
-
   const jwt_secret = get_config(config, "execute", "secret")
 
   if (jwt_secret) {
