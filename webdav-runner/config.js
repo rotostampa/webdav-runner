@@ -1,6 +1,5 @@
 export default {
     configuration: "~/.webdav-runner/config.json",
-    storage: "~/.webdav-runner",
     certificates: {
         key: "~/.webdav-runner/ssl.key",
         cert: "~/.webdav-runner/ssl.cert",
@@ -11,6 +10,7 @@ export default {
             admin: "admin",
             user: "user",
         },
+        storage: "~/.webdav-runner",
         folders: [
             {
                 path: "/",

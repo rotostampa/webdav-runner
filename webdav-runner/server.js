@@ -94,11 +94,11 @@ export default config => {
 
     const privilege_manager = new webdav.SimplePathPrivilegeManager()
 
-    const temp = expand_path([
-        config("storage"),
+    const temp = expand_path(
+        config("webdav", "storage"),
         `${config("webdav", "port")}`,
         `${config("bonjour", "port")}`,
-    ])
+    )
 
     const ssl_key = get_certificate_path(config, "key")
     const ssl_cert = get_certificate_path(config, "cert")
