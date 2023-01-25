@@ -14,6 +14,7 @@ import fs from "fs"
 import minimist from "minimist"
 import path from "path"
 
+
 const traverse_config = (configs, ...args) => {
     for (const current of configs) {
         let result = current
@@ -72,6 +73,9 @@ const subcommands = {
         }
     },
     startup: async config => {
+
+
+
         const process_exe = process.execPath
         const process_args = [
             process.argv[1],
@@ -79,7 +83,18 @@ const subcommands = {
             ...process.argv.slice(3),
         ]
 
+
+        //const process_exe = 'npm'
+        //const process_args = [
+        //    'exec', '--y', 'webdav-runner@latest',
+        //    "server",
+        //    ...process.argv.slice(3),
+        //]
+
         const library = await startup
+
+        console.info('registering at startup', process_exe, ...process_args)
+
 
         library.remove(config("startup", "name"))
         library.create(
