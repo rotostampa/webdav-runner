@@ -1,10 +1,12 @@
 export default {
     configuration: "~/.webdav-runner/config.json",
     storage: "~/.webdav-runner",
+    certificates: {
+        key: "~/.webdav-runner/ssl.key",
+        cert: "~/.webdav-runner/ssl.cert",
+    },
     webdav: {
         port: 1900,
-        ssl_key: "~/.webdav-runner/ssl.key",
-        ssl_cert: "~/.webdav-runner/ssl.cert",
         users: {
             admin: "admin",
             user: "user",

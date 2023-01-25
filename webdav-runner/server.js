@@ -70,6 +70,13 @@ function bonjour_advertise(config) {
     return settings
 }
 
+function get_certificate_path(config, key) {
+    const p = expand_path(config("certificates", key))
+    return fs.existsSync(p)
+        ? p
+        : local_path(`../certs/self-signed.${key}.pem`)
+}
+
 export default config => {
     const bonjour = bonjour_advertise(config)
 
@@ -93,12 +100,8 @@ export default config => {
         `${config("bonjour", "port")}`,
     ])
 
-    const ssl_key = fs.existsSync(expand_path(config("webdav", "ssl_key")))
-        ? expand_path(config("webdav", "ssl_key"))
-        : local_path("../certs/self-signed.key.pem")
-    const ssl_cert = fs.existsSync(expand_path(config("webdav", "ssl_cert")))
-        ? expand_path(config("webdav", "ssl_cert"))
-        : local_path("../certs/self-signed.cert.pem")
+    const ssl_key = get_certificate_path(config, "key")
+    const ssl_cert = get_certificate_path(config, "cert")
 
     const settings = {
         httpAuthentication: new webdav.HTTPBasicAuthentication(

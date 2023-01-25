@@ -35,8 +35,8 @@ const make_cert = config =>
 
 export const ensure_certs = async (config, renew) => {
     const cert = {
-        key: expand_path(config("webdav", "ssl_key")),
-        cert: expand_path(config("webdav", "ssl_cert")),
+        key: expand_path(config("certificates", "key")),
+        cert: expand_path(config("certificates", "cert")),
     }
 
     console.info("creating certs", cert)
