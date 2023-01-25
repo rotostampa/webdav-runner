@@ -76,7 +76,7 @@ const subcommands = {
     startup: async args => {
 
         const process_exe = process.execPath
-        const process_args = [process.argv[1], 'server', '--config', args.config || default_config_location]
+        const process_args = args.config ? [process.argv[1], 'server', '--config', args.config] ? [process.argv[1], 'server']
 
         console.log('adding to startup', process_exe, ...process_args)
 
