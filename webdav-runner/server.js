@@ -275,7 +275,11 @@ export default config => {
                             stderr,
                         })
 
-                        console.info("🚀 running complete:", result.command, ...result.arguments)
+                        console.info(
+                            "🚀 running complete:",
+                            result.command,
+                            ...result.arguments
+                        )
 
                         if (error) console.error(error)
                         if (stderr) console.warn(stderr)
