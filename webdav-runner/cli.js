@@ -14,9 +14,6 @@ import fs from "fs"
 import minimist from "minimist"
 import path from "path"
 
-
-
-
 const traverse_config = (configs, ...args) => {
     for (const current of configs) {
         let result = current
@@ -36,15 +33,17 @@ const traverse_config = (configs, ...args) => {
     }
 }
 
-
 const make_config = cliconf => {
-    const file = expand_path(cliconf.configuration || default_config.configuration) 
+    const file = expand_path(
+        cliconf.configuration || default_config.configuration
+    )
     let fileconf = {}
 
     if (fs.existsSync(file)) {
         fileconf = json_loads(read_file(file))
     }
-    return (...args) =>  traverse_config([cliconf, fileconf, default_config], ...args)
+    return (...args) =>
+        traverse_config([cliconf, fileconf, default_config], ...args)
 }
 
 const argv = minimist(process.argv.slice(2))
@@ -54,34 +53,29 @@ const subcommands = {
         console.info(`available commands: ${Object.keys(subcommands)}`),
     server: async config => await server(config),
     setup: async config => {
+        const localconfig = expand_path(config("configuration"))
 
-        const localconfig = expand_path(config('configuration'))
-
-        if (! fs.existsSync(localconfig)) {
+        if (!fs.existsSync(localconfig)) {
             console.info("creating conf under", localconfig)
             ensure_dir(path.dirname(localconfig))
             write_json(localconfig, default_config)
         }
 
-        //const { cert } = await ensure_certs(used_conf)
-
-        // security add-trusted-cert certs/self-signed.cert.pem
-
-        //if (process.platform == "darwin") {
-        //    exec_file("/usr/bin/security", [
-        //        "add-trusted-cert",
-        //        expand_path(cert),
-        //    ])
-        //}
     },
-    certificates: async args => {
-        
+    certificates: async config => {
+        const {cert} = await ensure_certs(config, true)
+
+        if (process.platform == "darwin") {
+            exec_file("/usr/bin/security", [
+                "add-trusted-cert",
+                expand_path(cert),
+            ])
+        }
+
     },
     startup: async config => {
         const process_exe = process.execPath
-        const process_args = args.config
-            ? [process.argv[1], "server", "--config", args.config]
-            : [process.argv[1], "server"]
+        const process_args = [process.argv[1], "server", ...process.argv.slice(3)]
 
         const library = await startup
 
@@ -102,7 +96,7 @@ const subcommands = {
 const command = argv._[0]
 
 if (argv._.length > 1) {
-    console.error('no positional arguments are allowed: ', ...argv._.slice(1))
+    console.error("no positional arguments are allowed: ", ...argv._.slice(1))
 } else {
     delete argv._
 }

@@ -1,4 +1,4 @@
-import { write_file } from "../webdav-runner/utils.js"
+import { write_file, expand_path } from "../webdav-runner/utils.js"
 import fs from "fs"
 import pem from "pem"
 
@@ -17,9 +17,11 @@ const make_cert = days =>
 
 export const ensure_certs = async (config, renew) => {
     const cert = {
-        key: config("webdav", "ssl_key"),
-        cert: config("webdav", "ssl_cert"),
+        key: expand_path(config("webdav", "ssl_key")),
+        cert: expand_path(config("webdav", "ssl_cert")),
     }
+
+    console.info("creating certs", cert)
 
     if (!fs.existsSync(cert.key) || !fs.existsSync(cert.cert) || renew) {
         const newcert = await make_cert()

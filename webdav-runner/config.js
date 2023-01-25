@@ -3,8 +3,8 @@ export default {
     storage: "~/.webdav-runner",
     webdav: {
         port: 1900,
-        ssl_key: null,
-        ssl_cert: null,
+        ssl_key: "~/.webdav-runner/ssl.key",
+        ssl_cert: "~/.webdav-runner/ssl.cert",
         users: {
             admin: "admin",
             user: "user",

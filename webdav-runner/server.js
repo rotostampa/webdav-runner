@@ -9,6 +9,7 @@ import {
 import Bonjour from "bonjour"
 import { execFile as exec_file } from "child_process"
 import express from "express"
+import fs from "fs"
 import httpproxy from "http-proxy"
 import https from "https"
 import jwt from "jsonwebtoken"
@@ -54,13 +55,13 @@ const SERVICES = {
 function bonjour_advertise(config) {
     const settings = {
         name:
-            config( "bonjour", "name") ||
+            config("bonjour", "name") ||
             machine_id.machineIdSync({ original: true }),
-        type: config( "bonjour", "type"),
-        port: config( "bonjour", "port"),
+        type: config("bonjour", "type"),
+        port: config("bonjour", "port"),
         txt: {
             platform: process.platform,
-            port: config( "webdav", "port"),
+            port: config("webdav", "port"),
         },
     }
 
@@ -79,7 +80,7 @@ export default config => {
     const users = {}
 
     for (const [username, password] of Object.entries(
-        config( "webdav", "users")
+        config("webdav", "users")
     )) {
         users[username] = user_manager.addUser(username, password, false)
     }
@@ -87,10 +88,17 @@ export default config => {
     const privilege_manager = new webdav.SimplePathPrivilegeManager()
 
     const temp = expand_path([
-        config( "storage"),
-        `${config( "webdav", "port")}`,
-        `${config( "bonjour", "port")}`,
+        config("storage"),
+        `${config("webdav", "port")}`,
+        `${config("bonjour", "port")}`,
     ])
+
+    const ssl_key = fs.existsSync(expand_path(config("webdav", "ssl_key")))
+        ? expand_path(config("webdav", "ssl_key"))
+        : local_path("../certs/self-signed.key.pem")
+    const ssl_cert = fs.existsSync(expand_path(config("webdav", "ssl_cert")))
+        ? expand_path(config("webdav", "ssl_cert"))
+        : local_path("../certs/self-signed.cert.pem")
 
     const settings = {
         httpAuthentication: new webdav.HTTPBasicAuthentication(
@@ -98,18 +106,12 @@ export default config => {
             "realm"
         ),
         privilegeManager: privilege_manager,
-        port: config( "webdav", "port"),
-        hostname: config( "webdav", "hostname"),
+        port: config("webdav", "port"),
+        hostname: config("webdav", "hostname"),
         withCredentials: true,
         https: {
-            key: read_file(
-                config( "webdav", "ssl_key") ||
-                    local_path("../certs/self-signed.key.pem")
-            ),
-            cert: read_file(
-                config( "webdav", "ssl_cert") ||
-                    local_path("../certs/self-signed.cert.pem")
-            ),
+            key: read_file(ssl_key),
+            cert: read_file(ssl_cert),
         },
         maxRequestDepth: Infinity,
         //headers: {
@@ -123,7 +125,7 @@ export default config => {
 
     const server = new webdav.WebDAVServer(settings)
 
-    const folders = config( "webdav", "folders")
+    const folders = config("webdav", "folders")
     const context = {
         server,
         users,
@@ -153,27 +155,24 @@ export default config => {
 
     const servers = {}
 
-    Bonjour().find(
-        { type: config("bonjour", "type") },
-        e => {
-            delete e.rawTxt
-            servers[e.name] = {
-                proxy: `https://${proxyprefix}${e.name}${proxydomain}:${e.txt.port}/`,
-                address: e.referer.address,
-                ...e.txt,
-            }
+    Bonjour().find({ type: config("bonjour", "type") }, e => {
+        delete e.rawTxt
+        servers[e.name] = {
+            proxy: `https://${proxyprefix}${e.name}${proxydomain}:${e.txt.port}/`,
+            address: e.referer.address,
+            ...e.txt,
         }
-    )
+    })
 
     const app = express()
 
-    let proxydomain = config( "proxy", "domain")
+    let proxydomain = config("proxy", "domain")
     if (!startswith(proxydomain, ".")) {
         proxydomain = "." + proxydomain
     }
-    const proxyprefix = config( "proxy", "prefix")
+    const proxyprefix = config("proxy", "prefix")
     const proxy = httpproxy.createProxyServer({
-        secure: config( "proxy", "secure") ? true : false,
+        secure: config("proxy", "secure") ? true : false,
         ignorePath: true,
     }) // See (†)
 
@@ -242,7 +241,7 @@ export default config => {
         })
     })
 
-    const jwt_secret = config( "execute", "secret")
+    const jwt_secret = config("execute", "secret")
 
     if (jwt_secret) {
         //console.info("sample jwt request")
@@ -297,5 +296,9 @@ export default config => {
         console.info(
             `   https://${proxyprefix}${bonjour.name}${proxydomain}:${settings.port}/`
         )
+
+        console.info()
+        console.info("   ssl_key:", ssl_key)
+        console.info("   ssl_cert:", ssl_cert)
     })
 }
