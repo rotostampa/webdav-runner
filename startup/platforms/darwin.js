@@ -7,7 +7,7 @@ const dir = untildify('~/Library/LaunchAgents')
 
 
 
-function getFile (name) {
+function get_file (name) {
   return `${dir}/${name}.plist`
 }
 
@@ -17,7 +17,7 @@ function add (name, cmd, args = [], out) {
     .map(a => `    <string>${a}</string>`)
     .join('\n')
 
-  const file = getFile(name)
+  const file = get_file(name)
 
   const lines = [
     '<?xml version="1.0" encoding="UTF-8"?>',
@@ -59,7 +59,7 @@ function create (name, cmd, args = [], out) {
 }
 
 function remove (name) {
-  const file = getFile(name)
+  const file = get_file(name)
   if (fs.existsSync(file)) fs.unlinkSync(file)
   try {
     cp.execSync(`launchctl remove ${name}`)
@@ -68,7 +68,7 @@ function remove (name) {
 
 export default {
   dir,
-  getFile,
+  get_file,
   add,
   create,
   remove

@@ -22,12 +22,12 @@ function spawn (cmd, args = [], out) {
     .unref()
 }
 
-function getFile (name) {
+function get_file (name) {
   return `${dir}/${name}.desktop`
 }
 
 function add (name, cmd, args = [], out) {
-  const file = getFile(name)
+  const file = get_file(name)
 
   let command = cmd
 
@@ -61,14 +61,14 @@ function create (name, cmd, args = [], out) {
 }
 
 function remove (name) {
-  const file = getFile(name)
+  const file = get_file(name)
   if (fs.existsSync(file)) fs.unlinkSync(file)
 }
 
 
 export default {
   dir,
-  getFile,
+  get_file,
   add,
   create,
   remove
