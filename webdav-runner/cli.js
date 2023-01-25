@@ -78,8 +78,6 @@ const subcommands = {
         const process_exe = process.execPath
         const process_args = args.config ? [process.argv[1], 'server', '--config', args.config] ? [process.argv[1], 'server']
 
-        console.log('adding to startup', process_exe, ...process_args)
-
         const library = await startup
 
         library.remove(args.id || 'webdav-runner')
