@@ -71,27 +71,26 @@ const subcommands = {
         }
     },
     startup: async args => {
-
-        const config = load_config(args)
-
         const process_exe = process.execPath
         const process_args = args.config
             ? [process.argv[1], "server", "--config", args.config]
             : [process.argv[1], "server"]
 
+        const config = load_config(args)
         const library = await startup
 
-        library.remove(args.id || "webdav-runner")
+        library.remove(get_config(config, "startup", "name"))
         library.create(
-            args.id || "webdav-runner", // id
+            get_config(config, "startup", "name"), // id
             process_exe, // cmd
             process_args,
-            expand_path(get_config(config, 'startup', 'log'))
+            expand_path(get_config(config, "startup", "log"))
         )
     },
     startdown: async args => {
+        const config = load_config(args)
         const library = await startup
-        library.remove(args.id || "webdav-runner")
+        library.remove(get_config(config, "startup", "name"))
     },
 }
 
