@@ -1,4 +1,3 @@
-import default_config from "../webdav-runner/config.js"
 import fs from "fs"
 import path from "path"
 import untildify from "untildify"
@@ -33,4 +32,5 @@ export const read_json = loc => json_loads(read_file(loc))
 export const write_json = (loc, data) => write_file(loc, json_dumps(data))
 
 export const startswith = (str, prefix) => str && str.indexOf(prefix) === 0
-export const endswith = (str, suffix) => str.indexOf(suffix, str.length - suffix.length) !== -1
+export const endswith = (str, suffix) =>
+    str.indexOf(suffix, str.length - suffix.length) !== -1

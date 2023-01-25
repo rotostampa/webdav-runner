@@ -60,10 +60,9 @@ const subcommands = {
             ensure_dir(path.dirname(localconfig))
             write_json(localconfig, default_config)
         }
-
     },
     certificates: async config => {
-        const {cert} = await ensure_certs(config, true)
+        const { cert } = await ensure_certs(config, true)
 
         if (process.platform == "darwin") {
             exec_file("/usr/bin/security", [
@@ -71,11 +70,14 @@ const subcommands = {
                 expand_path(cert),
             ])
         }
-
     },
     startup: async config => {
         const process_exe = process.execPath
-        const process_args = [process.argv[1], "server", ...process.argv.slice(3)]
+        const process_args = [
+            process.argv[1],
+            "server",
+            ...process.argv.slice(3),
+        ]
 
         const library = await startup
 

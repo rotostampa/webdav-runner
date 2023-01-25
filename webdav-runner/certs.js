@@ -2,27 +2,31 @@ import { write_file, expand_path } from "../webdav-runner/utils.js"
 import fs from "fs"
 import pem from "pem"
 
-const make_alt_names = (config) => {
-
+const make_alt_names = config => {
     const domains = {}
 
-    for (let d of ['localhost', 'localtest.me', '*.localtest.me', `${config("proxy", "domain")}`, `*.${config("proxy", "domain")}`]) {
+    for (let d of [
+        "localhost",
+        "localtest.me",
+        "*.localtest.me",
+        `${config("proxy", "domain")}`,
+        `*.${config("proxy", "domain")}`,
+    ]) {
         domains[d] = d
     }
 
-    console.info('generating certificate for:', ...Object.keys(domains))
+    console.info("generating certificate for:", ...Object.keys(domains))
 
     return Object.keys(domains)
-
 }
 
 const make_cert = config =>
     new Promise((resolve, reject) =>
         pem.createCertificate(
-            { 
-                days: 50000, 
-                selfSigned: true, 
-                altNames: make_alt_names(config)
+            {
+                days: 50000,
+                selfSigned: true,
+                altNames: make_alt_names(config),
             },
             (err, keys) => {
                 if (err) {
