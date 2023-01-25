@@ -103,8 +103,14 @@ export default config => {
         hostname: get_config(config, "webdav", "hostname"),
         withCredentials: true,
         https: {
-            key: read_file(get_config(config, "webdav", "ssl_key") || local_path('../certs/self-signed.key.pem')),
-            cert: read_file(get_config(config, "webdav", "ssl_cert") || local_path('../certs/self-signed.cert.pem')),
+            key: read_file(
+                get_config(config, "webdav", "ssl_key") ||
+                    local_path("../certs/self-signed.key.pem")
+            ),
+            cert: read_file(
+                get_config(config, "webdav", "ssl_cert") ||
+                    local_path("../certs/self-signed.cert.pem")
+            ),
         },
         maxRequestDepth: Infinity,
         //headers: {
