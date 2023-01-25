@@ -80,8 +80,10 @@ const subcommands = {
 
         console.log('adding to startup', process_exe, ...process_args)
 
-        startup.remove(args.id || 'webdav-runner')
-        startup.create(
+        const library = await startup
+
+        library.remove(args.id || 'webdav-runner')
+        library.create(
           args.id || 'webdav-runner', // id
           process_exe, // cmd
           process_args

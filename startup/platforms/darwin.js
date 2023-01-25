@@ -31,7 +31,7 @@ function add (name, cmd, args = [], out) {
     array,
     '  </array>',
     '  <key>KeepAlive</key>',
-    '  <true/>'
+    '  <true/>',
     '  <key>RunAtLoad</key>',
     '  <true/>'
   ]
