@@ -1,6 +1,7 @@
-import { write_file, expand_path } from "../webdav-runner/utils.js"
+import { write_file, expand_path, ensure_dir } from "../webdav-runner/utils.js"
 import fs from "fs"
 import pem from "pem"
+import path from "path"
 
 const make_alt_names = config => {
     const domains = {}
@@ -47,6 +48,9 @@ export const ensure_certs = async (config, renew) => {
 
     if (!fs.existsSync(cert.key) || !fs.existsSync(cert.cert) || renew) {
         const newcert = await make_cert(config)
+
+        ensure_dir(path.dirname(cert.key))
+        ensure_dir(path.dirname(cert.cert))
 
         write_file(cert.key, newcert.key)
         write_file(cert.cert, newcert.cert)
