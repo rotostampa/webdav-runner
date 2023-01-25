@@ -22,13 +22,13 @@ const default_config_location = expand_path([
 
 const load_config = args => {
     if (args.config) {
-        console.log("load custom config in ", args.config)
+        console.info("load custom config in ", args.config)
         return json_loads(read_file(args.config))
     } else if (fs.existsSync(default_config_location)) {
-        console.log("load default config in ", default_config_location)
+        console.info("load default config in ", default_config_location)
         return json_loads(read_file(default_config_location))
     } else {
-        console.log("no config found")
+        console.info("no config found")
         return null
     }
 }
@@ -37,12 +37,12 @@ const argv = minimist(process.argv.slice(2))
 
 const subcommands = {
     help: async () =>
-        console.log(`available commands: ${Object.keys(subcommands)}`),
+        console.info(`available commands: ${Object.keys(subcommands)}`),
     server: async args => await server(load_config(args)),
     setup: async args => {
         let used_conf = load_config(args)
         if (!used_conf) {
-            console.log("creating conf under", default_config_location)
+            console.info("creating conf under", default_config_location)
 
             used_conf = { ...default_config }
             used_conf["webdav"]["ssl_key"] = path.join(
@@ -71,6 +71,9 @@ const subcommands = {
         }
     },
     startup: async args => {
+
+        const config = load_config(args)
+
         const process_exe = process.execPath
         const process_args = args.config
             ? [process.argv[1], "server", "--config", args.config]
@@ -82,7 +85,8 @@ const subcommands = {
         library.create(
             args.id || "webdav-runner", // id
             process_exe, // cmd
-            process_args
+            process_args,
+            expand_path(get_config(config, 'startup', 'log'))
         )
     },
     startdown: async args => {

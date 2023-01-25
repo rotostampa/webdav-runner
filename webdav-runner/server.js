@@ -73,7 +73,7 @@ function bonjour_advertise(config) {
 export default config => {
     const bonjour = bonjour_advertise(config)
 
-    console.log("started bonjour using", bonjour)
+    console.info("started bonjour using", bonjour)
 
     const user_manager = new webdav.SimpleUserManager()
 
@@ -202,10 +202,10 @@ export default config => {
             const target = servers[proxyname]
 
             if (target && proxyname == bonjour.name) {
-                console.log("proxy to self, skipping")
+                console.info("proxy to self, skipping")
             } else if (target) {
                 const url = `https://${target.address}:${target.port}${req.path}`
-                console.log("forwarding to", url)
+                console.info("forwarding to", url)
                 proxy.web(req, res, { target: url }, e => {
                     res.status(502)
                     res.send({
@@ -225,7 +225,7 @@ export default config => {
 
         next()
 
-        console.log(
+        console.info(
             "🤖",
             req.method,
             `https://${req.socket.servername}:${settings.port}${req.path}`
@@ -246,22 +246,22 @@ export default config => {
     const jwt_secret = get_config(config, "execute", "secret")
 
     if (jwt_secret) {
-        //console.log("sample jwt request")
-        //console.log(`curl https://localhost:${settings.port}/execute/${jwt.sign({ command: "/usr/bin/say", arguments: ["hello"] }, jwt_secret)}/ --insecure`)
+        //console.info("sample jwt request")
+        //console.info(`curl https://localhost:${settings.port}/execute/${jwt.sign({ command: "/usr/bin/say", arguments: ["hello"] }, jwt_secret)}/ --insecure`)
 
         app.get("/execute/:jwt", (req, res) => {
             let result
             try {
                 result = jwt.verify(req.params.jwt, jwt_secret)
             } catch (e) {
-                console.log("invalid jwt", e)
+                console.info("invalid jwt", e)
             }
 
             if (!result) {
                 res.status(401)
                 res.send({ success: false, status: 401 })
             } else {
-                console.log("🚀 running", result.command, ...result.arguments)
+                console.info("🚀 running", result.command, ...result.arguments)
                 exec_file(
                     result.command || "/bin/hostname",
                     result.arguments || [],
@@ -274,6 +274,12 @@ export default config => {
                             stdout,
                             stderr,
                         })
+
+                        console.info("🚀 running complete:", result.command, ...result.arguments)
+
+                        if (error) console.error(error)
+                        if (stderr) console.warn(stderr)
+                        if (stdout) console.log(stdout)
                     }
                 )
             }
@@ -283,9 +289,9 @@ export default config => {
     app.use(webdav.extensions.express("/", server))
 
     https.createServer(settings.https, app).listen(settings.port, () => {
-        console.log("🥷 server listening on:")
-        console.log(`   https://localhost:${settings.port}/`)
-        console.log(
+        console.info("🥷 server listening on:")
+        console.info(`   https://localhost:${settings.port}/`)
+        console.info(
             `   https://${proxyprefix}${bonjour.name}${proxydomain}:${settings.port}/`
         )
     })

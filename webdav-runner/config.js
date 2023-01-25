@@ -35,4 +35,8 @@ export default {
         prefix: "webdav-",
         secure: false,
     },
+    startup: {
+        log: "~/.webdav-runner/webdav-runner.log",
+        name: "webdav-runner"
+    }
 }
