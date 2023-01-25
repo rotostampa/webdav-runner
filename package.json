@@ -12,6 +12,8 @@
     "help": "node ./webdav-runner/cli.js help",
     "server": "node ./webdav-runner/cli.js server",
     "setup": "node ./webdav-runner/cli.js setup",
+    "startup": "node ./webdav-runner/cli.js startup",
+    "startdown": "node ./webdav-runner/cli.js startdown",
     "lint": "prettier ./webdav-runner --write --no-semi --tab-width 4 --arrow-parens avoid && eslint ./webdav-runner/** --fix --ext .js"
   },
   "author": "riccardo di virgilio",
@@ -24,7 +26,9 @@
     "minimist": "^1.2.7",
     "node-machine-id": "^1.1.12",
     "pem": "^1.14.6",
-    "webdav-server": "^2.6.2"
+    "webdav-server": "^2.6.2",
+    "mkdirp": "^0.5.1",
+    "untildify": "^2.1.0"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.0.0",

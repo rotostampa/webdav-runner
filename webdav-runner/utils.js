@@ -2,22 +2,19 @@ import default_config from "../webdav-runner/config.js"
 import fs from "fs"
 import path from "path"
 import url from "url"
+import untildify from 'untildify'
 
 const homedir =
     process.env[process.platform == "win32" ? "USERPROFILE" : "HOME"]
 
+export const local_path = loc => path.join(path.dirname(url.fileURLToPath(import.meta.url)), loc)
 export const expand_path = loc => {
-    if (!loc) return loc
-
     if (typeof loc !== "string") {
         loc = path.join(...loc)
     }
-    if (loc == "~") return homedir
-    if (loc.slice(0, 2) == "~/") return path.join(homedir, loc.slice(2))
-    if (loc.slice(0, 3) == "../")
-        return path.join(path.dirname(url.fileURLToPath(import.meta.url)), loc)
-    return loc
+    return untildify(loc)
 }
+
 
 export const ensure_dir = (dir, del) => {
     const folder = expand_path(dir)

@@ -1,6 +1,7 @@
 import { ensure_certs } from "../webdav-runner/certs.js"
 import default_config from "../webdav-runner/config.js"
 import server from "../webdav-runner/server.js"
+import startup from '../startup/startup.js'
 import {
     read_file,
     get_config,
@@ -13,6 +14,9 @@ import { execFile as exec_file } from "child_process"
 import fs from "fs"
 import minimist from "minimist"
 import path from "path"
+
+
+
 
 const default_config_location = expand_path([
     get_config({}, "storage"),
@@ -69,6 +73,25 @@ const subcommands = {
             ])
         }
     },
+    startup: async args => {
+
+        const process_exe = process.execPath
+        const process_args = [process.argv[1], 'server', '--config', args.config || default_config_location]
+
+        console.log('adding to startup', process_exe, ...process_args)
+
+        startup.remove(args.id || 'webdav-runner')
+        startup.create(
+          args.id || 'webdav-runner', // id
+          process_exe, // cmd
+          process_args
+        )
+        
+    },
+    startdown: async args => {
+        const library = await startup
+        library.remove(args.id || 'webdav-runner')
+    }
 }
 
 const command = argv._[0]

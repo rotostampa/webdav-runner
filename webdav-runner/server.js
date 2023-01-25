@@ -5,6 +5,7 @@ import {
     read_file,
     startswith,
     endswith,
+    local_path,
 } from "../webdav-runner/utils.js"
 import Bonjour from "bonjour"
 import { execFile as exec_file } from "child_process"
@@ -102,8 +103,8 @@ export default config => {
         hostname: get_config(config, "webdav", "hostname"),
         withCredentials: true,
         https: {
-            key: read_file(get_config(config, "webdav", "ssl_key")),
-            cert: read_file(get_config(config, "webdav", "ssl_cert")),
+            key: read_file(get_config(config, "webdav", "ssl_key") || local_path('../certs/self-signed.key.pem')),
+            cert: read_file(get_config(config, "webdav", "ssl_cert") || local_path('../certs/self-signed.cert.pem')),
         },
         maxRequestDepth: Infinity,
         //headers: {
