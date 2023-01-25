@@ -4,7 +4,6 @@ import default_config from "../webdav-runner/config.js"
 import server from "../webdav-runner/server.js"
 import {
     read_file,
-    get_config,
     json_loads,
     ensure_dir,
     expand_path,
@@ -15,22 +14,37 @@ import fs from "fs"
 import minimist from "minimist"
 import path from "path"
 
-const default_config_location = expand_path([
-    get_config({}, "storage"),
-    "config.json",
-])
 
-const load_config = args => {
-    if (args.config) {
-        console.info("load custom config in ", args.config)
-        return json_loads(read_file(args.config))
-    } else if (fs.existsSync(default_config_location)) {
-        console.info("load default config in ", default_config_location)
-        return json_loads(read_file(default_config_location))
-    } else {
-        console.info("no config found")
-        return null
+
+
+const traverse_config = (configs, ...args) => {
+    for (const current of configs) {
+        let result = current
+
+        loop: for (const key of args) {
+            if (result && typeof result[key] !== "undefined") {
+                result = result[key]
+            } else {
+                result = null
+                break loop
+            }
+        }
+
+        if (result) {
+            return result
+        }
     }
+}
+
+
+const make_config = cliconf => {
+    const file = expand_path(cliconf.configuration || default_config.configuration) 
+    let fileconf = {}
+
+    if (fs.existsSync(file)) {
+        fileconf = json_loads(read_file(file))
+    }
+    return (...args) =>  traverse_config([cliconf, fileconf, default_config], ...args)
 }
 
 const argv = minimist(process.argv.slice(2))
@@ -38,68 +52,63 @@ const argv = minimist(process.argv.slice(2))
 const subcommands = {
     help: async () =>
         console.info(`available commands: ${Object.keys(subcommands)}`),
-    server: async args => await server(load_config(args)),
-    setup: async args => {
-        let used_conf = load_config(args)
-        if (!used_conf) {
-            console.info("creating conf under", default_config_location)
+    server: async config => await server(config),
+    setup: async config => {
 
-            used_conf = { ...default_config }
-            used_conf["webdav"]["ssl_key"] = path.join(
-                used_conf["storage"],
-                "certificate.key"
-            )
-            used_conf["webdav"]["ssl_cert"] = path.join(
-                used_conf["storage"],
-                "certificate.cert"
-            )
+        const localconfig = expand_path(config('configuration'))
 
-            ensure_dir(used_conf["storage"])
-
-            write_json(default_config_location, used_conf)
+        if (! fs.existsSync(localconfig)) {
+            console.info("creating conf under", localconfig)
+            ensure_dir(path.dirname(localconfig))
+            write_json(localconfig, default_config)
         }
 
-        const { cert } = await ensure_certs(used_conf)
+        //const { cert } = await ensure_certs(used_conf)
 
         // security add-trusted-cert certs/self-signed.cert.pem
 
-        if (process.platform == "darwin") {
-            exec_file("/usr/bin/security", [
-                "add-trusted-cert",
-                expand_path(cert),
-            ])
-        }
+        //if (process.platform == "darwin") {
+        //    exec_file("/usr/bin/security", [
+        //        "add-trusted-cert",
+        //        expand_path(cert),
+        //    ])
+        //}
     },
-    startup: async args => {
+    certificates: async args => {
+        
+    },
+    startup: async config => {
         const process_exe = process.execPath
         const process_args = args.config
             ? [process.argv[1], "server", "--config", args.config]
             : [process.argv[1], "server"]
 
-        const config = load_config(args)
         const library = await startup
 
-        library.remove(get_config(config, "startup", "name"))
+        library.remove(config("startup", "name"))
         library.create(
-            get_config(config, "startup", "name"), // id
+            config("startup", "name"), // id
             process_exe, // cmd
             process_args,
-            expand_path(get_config(config, "startup", "log"))
+            expand_path(config("startup", "log"))
         )
     },
-    startdown: async args => {
-        const config = load_config(args)
+    startdown: async config => {
         const library = await startup
-        library.remove(get_config(config, "startup", "name"))
+        library.remove(config("startup", "name"))
     },
 }
 
 const command = argv._[0]
 
-argv._ = argv._.slice(1)
+if (argv._.length > 1) {
+    console.error('no positional arguments are allowed: ', ...argv._.slice(1))
+} else {
+    delete argv._
+}
 
 if (command && subcommands[command]) {
-    subcommands[command](argv)
+    subcommands[command](make_config(argv))
 } else {
-    subcommands["help"](argv)
+    subcommands["help"](make_config(argv))
 }

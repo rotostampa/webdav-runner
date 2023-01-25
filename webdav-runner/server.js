@@ -1,7 +1,6 @@
 import {
     ensure_dir,
     expand_path,
-    get_config,
     read_file,
     startswith,
     endswith,
@@ -55,13 +54,13 @@ const SERVICES = {
 function bonjour_advertise(config) {
     const settings = {
         name:
-            get_config(config, "bonjour", "name") ||
+            config( "bonjour", "name") ||
             machine_id.machineIdSync({ original: true }),
-        type: get_config(config, "bonjour", "type"),
-        port: get_config(config, "bonjour", "port"),
+        type: config( "bonjour", "type"),
+        port: config( "bonjour", "port"),
         txt: {
             platform: process.platform,
-            port: get_config(config, "webdav", "port"),
+            port: config( "webdav", "port"),
         },
     }
 
@@ -80,7 +79,7 @@ export default config => {
     const users = {}
 
     for (const [username, password] of Object.entries(
-        get_config(config, "webdav", "users")
+        config( "webdav", "users")
     )) {
         users[username] = user_manager.addUser(username, password, false)
     }
@@ -88,9 +87,9 @@ export default config => {
     const privilege_manager = new webdav.SimplePathPrivilegeManager()
 
     const temp = expand_path([
-        get_config(config, "storage"),
-        `${get_config(config, "webdav", "port")}`,
-        `${get_config(config, "bonjour", "port")}`,
+        config( "storage"),
+        `${config( "webdav", "port")}`,
+        `${config( "bonjour", "port")}`,
     ])
 
     const settings = {
@@ -99,16 +98,16 @@ export default config => {
             "realm"
         ),
         privilegeManager: privilege_manager,
-        port: get_config(config, "webdav", "port"),
-        hostname: get_config(config, "webdav", "hostname"),
+        port: config( "webdav", "port"),
+        hostname: config( "webdav", "hostname"),
         withCredentials: true,
         https: {
             key: read_file(
-                get_config(config, "webdav", "ssl_key") ||
+                config( "webdav", "ssl_key") ||
                     local_path("../certs/self-signed.key.pem")
             ),
             cert: read_file(
-                get_config(config, "webdav", "ssl_cert") ||
+                config( "webdav", "ssl_cert") ||
                     local_path("../certs/self-signed.cert.pem")
             ),
         },
@@ -124,7 +123,7 @@ export default config => {
 
     const server = new webdav.WebDAVServer(settings)
 
-    const folders = get_config(config, "webdav", "folders")
+    const folders = config( "webdav", "folders")
     const context = {
         server,
         users,
@@ -155,7 +154,7 @@ export default config => {
     const servers = {}
 
     Bonjour().find(
-        { type: get_config(context.config, "bonjour", "type") },
+        { type: config("bonjour", "type") },
         e => {
             delete e.rawTxt
             servers[e.name] = {
@@ -168,13 +167,13 @@ export default config => {
 
     const app = express()
 
-    let proxydomain = get_config(config, "proxy", "domain")
+    let proxydomain = config( "proxy", "domain")
     if (!startswith(proxydomain, ".")) {
         proxydomain = "." + proxydomain
     }
-    const proxyprefix = get_config(config, "proxy", "prefix")
+    const proxyprefix = config( "proxy", "prefix")
     const proxy = httpproxy.createProxyServer({
-        secure: get_config(config, "proxy", "secure") ? true : false,
+        secure: config( "proxy", "secure") ? true : false,
         ignorePath: true,
     }) // See (†)
 
@@ -243,7 +242,7 @@ export default config => {
         })
     })
 
-    const jwt_secret = get_config(config, "execute", "secret")
+    const jwt_secret = config( "execute", "secret")
 
     if (jwt_secret) {
         //console.info("sample jwt request")

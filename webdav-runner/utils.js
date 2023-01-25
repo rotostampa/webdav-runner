@@ -43,22 +43,3 @@ export const startswith = (str, prefix) => {
 export const endswith = (str, suffix) => {
     return str.indexOf(suffix, str.length - suffix.length) !== -1
 }
-
-export const get_config = (config, ...args) => {
-    for (const current of [config, default_config]) {
-        let result = current
-
-        loop: for (const key of args) {
-            if (result && typeof result[key] !== "undefined") {
-                result = result[key]
-            } else {
-                result = null
-                break loop
-            }
-        }
-
-        if (result) {
-            return result
-        }
-    }
-}

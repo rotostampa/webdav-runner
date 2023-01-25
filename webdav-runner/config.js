@@ -1,4 +1,5 @@
 export default {
+    configuration: "~/.webdav-runner/config.json",
     storage: "~/.webdav-runner",
     webdav: {
         port: 1900,
