@@ -1,3 +1,4 @@
+import { find_existing_certs } from "../webdav-runner/certs.js"
 import pkg from "../webdav-runner/pkg.js"
 import {
     ensure_dir,
@@ -5,15 +6,10 @@ import {
     read_file,
     startswith,
     endswith,
-    local_path,
 } from "../webdav-runner/utils.js"
-
-import {find_existing_certs}  from "../webdav-runner/certs.js"
-
 import Bonjour from "bonjour"
 import { execFile as exec_file } from "child_process"
 import express from "express"
-import fs from "fs"
 import httpproxy from "http-proxy"
 import https from "https"
 import jwt from "jsonwebtoken"
@@ -75,7 +71,6 @@ function bonjour_advertise(config) {
     return settings
 }
 
-
 export default config => {
     const bonjour = bonjour_advertise(config)
 
@@ -100,7 +95,6 @@ export default config => {
     )
 
     const certs = find_existing_certs(config)
-
 
     const settings = {
         httpAuthentication: new webdav.HTTPBasicAuthentication(
@@ -247,7 +241,6 @@ export default config => {
     const jwt_secret = config("execute", "secret")
 
     if (jwt_secret) {
-
         //console.info("sample jwt request")
         //console.info(`curl https://localhost:${settings.port}/execute/${jwt.sign({ command: "npm", arguments: ["install", '-g', 'webdav-runner@latest'] }, jwt_secret)}/ --insecure`)
 

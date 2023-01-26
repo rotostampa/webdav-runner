@@ -1,5 +1,5 @@
 import startup from "../startup/startup.js"
-import { renew_certs, find_existing_certs } from "../webdav-runner/certs.js"
+import { renew_certs } from "../webdav-runner/certs.js"
 import default_config from "../webdav-runner/config.js"
 import server from "../webdav-runner/server.js"
 import {
@@ -11,8 +11,8 @@ import {
 } from "../webdav-runner/utils.js"
 import { execFile as exec_file } from "child_process"
 import fs from "fs"
-import os from "os"
 import minimist from "minimist"
+import os from "os"
 import path from "path"
 
 const traverse_config = (configs, ...args) => {
@@ -50,7 +50,7 @@ const make_config = cliconf => {
 const dump_current_config = config => {
     const result = {}
     for (const [key, values] of Object.entries(default_config)) {
-        if (key == 'configuration') {
+        if (key == "configuration") {
             result[key] = config(key)
         } else {
             result[key] = {}
@@ -61,8 +61,6 @@ const dump_current_config = config => {
     }
     return result
 }
-
-
 
 const subcommands = {
     help: async () =>
@@ -77,16 +75,15 @@ const subcommands = {
     renew_certs: async config => await renew_certs(config),
 
     accept_certs: async config => {
-        const cert = config("certificates", 'cert')
+        const cert = config("certificates", "cert")
 
         if (cert) {
-
-            if (! fs.existsSync(expand_path(cert))) {
-                console.error('non existing cert: ', cert)
+            if (!fs.existsSync(expand_path(cert))) {
+                console.error("non existing cert: ", cert)
                 process.exit(1)
             }
 
-            console.log('accepting cert', expand_path(cert))
+            console.log("accepting cert", expand_path(cert))
 
             if (process.platform == "darwin") {
                 exec_file("/usr/bin/security", [
@@ -94,11 +91,9 @@ const subcommands = {
                     expand_path(cert),
                 ])
             } else {
-                console.error('not implemented for platform:', os.platform())
+                console.error("not implemented for platform:", os.platform())
             }
         }
-
-
     },
 
     startup: async config => {
@@ -135,13 +130,15 @@ const subcommands = {
 }
 
 export default argv => {
-
     const parsed = minimist(argv)
 
     const command = parsed._[0]
 
     if (parsed._.length > 1) {
-        console.error("no positional arguments are allowed: ", ...parsed._.slice(1))
+        console.error(
+            "no positional arguments are allowed: ",
+            ...parsed._.slice(1)
+        )
     } else {
         delete parsed._
     }
@@ -151,5 +148,4 @@ export default argv => {
     } else {
         subcommands["help"](make_config(parsed))
     }
-
 }

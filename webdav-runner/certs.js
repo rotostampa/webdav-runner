@@ -1,4 +1,9 @@
-import { write_file, expand_path, ensure_dir, local_path } from "../webdav-runner/utils.js"
+import {
+    write_file,
+    expand_path,
+    ensure_dir,
+    local_path,
+} from "../webdav-runner/utils.js"
 import fs from "fs"
 import path from "path"
 import pem from "pem"
@@ -38,21 +43,22 @@ const make_cert = config =>
         )
     )
 
-export const find_existing_certs = (config) =>  {
+export const find_existing_certs = config => {
     const certs = {}
-    for (const key of ['key', 'cert']) {
+    for (const key of ["key", "cert"]) {
         const p = expand_path(config("certificates", key))
-        certs[key] = fs.existsSync(p) ? p : local_path(`../certs/self-signed.${key}.pem`)   
+        certs[key] = fs.existsSync(p)
+            ? p
+            : local_path(`../certs/self-signed.${key}.pem`)
     }
     return certs
 }
 
-export const renew_certs = async (config) => {
-
+export const renew_certs = async config => {
     const key = expand_path(config("certificates", "key"))
     const cert = expand_path(config("certificates", "cert"))
 
-    const {key: key_string, cert: cert_string} = await make_cert(config)
+    const { key: key_string, cert: cert_string } = await make_cert(config)
 
     ensure_dir(path.dirname(key))
     ensure_dir(path.dirname(cert))
@@ -60,5 +66,5 @@ export const renew_certs = async (config) => {
     write_file(key, key_string)
     write_file(cert, cert_string)
 
-    return {key, cert}
+    return { key, cert }
 }
