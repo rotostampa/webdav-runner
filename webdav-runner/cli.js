@@ -47,6 +47,21 @@ const make_config = cliconf => {
         traverse_config([cliconf, fileconf, default_config], ...args)
 }
 
+const dump_current_config = config => {
+    const result = {}
+    for (const [key, values] of Object.entries(default_config)) {
+        if (key == 'configuration') {
+            result[key] = config(key)
+        } else {
+            result[key] = {}
+            for (const subk of Object.keys(values)) {
+                result[key][subk] = config(key, subk)
+            }
+        }
+    }
+    return result
+}
+
 const argv = minimist(process.argv.slice(2))
 
 const subcommands = {
@@ -59,7 +74,7 @@ const subcommands = {
         if (!fs.existsSync(localconfig)) {
             console.info("creating conf under", localconfig)
             ensure_dir(path.dirname(localconfig))
-            write_json(localconfig, default_config)
+            write_json(localconfig, dump_current_config(config))
         }
     },
     renew_certs: async config => await renew_certs(config),
