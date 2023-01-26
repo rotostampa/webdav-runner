@@ -3,8 +3,8 @@ import path from "path"
 import untildify from "untildify"
 import url from "url"
 
-export const local_path = (...loc) =>
-    path.join(path.dirname(url.fileURLToPath(import.meta.url)), ...loc)
+export const local_path = (m, ...loc) =>
+    path.join(path.dirname(url.fileURLToPath(m.url)), ...loc)
 export const expand_path = (...loc) => untildify(path.join(...loc))
 
 export const ensure_dir = (dir, del) => {

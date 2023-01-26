@@ -49,7 +49,7 @@ export const find_existing_certs = config => {
         const p = expand_path(config("certificates", key))
         certs[key] = fs.existsSync(p)
             ? p
-            : local_path(`../certs/self-signed.${key}.pem`)
+            : local_path(import.meta, `../certs/self-signed.${key}.pem`)
     }
     return certs
 }
