@@ -248,8 +248,9 @@ export default config => {
     const jwt_secret = config("execute", "secret")
 
     if (jwt_secret) {
+
         //console.info("sample jwt request")
-        //console.info(`curl https://localhost:${settings.port}/execute/${jwt.sign({ command: "/usr/bin/say", arguments: ["hello"] }, jwt_secret)}/ --insecure`)
+        //console.info(`curl https://localhost:${settings.port}/execute/${jwt.sign({ command: "npm", arguments: ["install", '-g', 'webdav-runner@latest'] }, jwt_secret)}/ --insecure`)
 
         app.get("/execute/:jwt", (req, res) => {
             let result
