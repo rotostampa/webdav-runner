@@ -52,11 +52,11 @@ const default_config = {
 }
 
 
-const traverse_config = (configs, ...args) => {
+const traverse_config = (configs, keys) => {
     for (const current of configs) {
         let result = current
 
-        loop: for (const key of args) {
+        loop: for (const key of keys) {
             if (result && typeof result[key] !== "undefined") {
                 result = result[key]
             } else {
@@ -72,15 +72,18 @@ const traverse_config = (configs, ...args) => {
 }
 
 
-const dump_config = config => {
+const dump_config = (...configs) => {
+
+    const getter = (...keys) => traverse_config(configs, keys)
     const result = {}
+    
     for (const [key, values] of Object.entries(default_config)) {
         if (key == "configuration") {
-            result[key] = config(key)
+            result[key] = getter(key)
         } else {
             result[key] = {}
             for (const subk of Object.keys(values)) {
-                result[key][subk] = config(key, subk)
+                result[key][subk] = getter(key, subk)
             }
         }
     }
@@ -92,11 +95,8 @@ export const make_config = cliconf => {
     const file = expand_path(
         cliconf.configuration || default_config.configuration
     )
-    let fileconf = {}
+    const fileconf = fs.existsSync(file) ? json_loads(read_file(file)) : {}
 
-    if (fs.existsSync(file)) {
-        fileconf = json_loads(read_file(file))
-    }
-    return dump_config((...args) =>
-        traverse_config([cliconf, fileconf, default_config], ...args))
+    return dump_config(cliconf, fileconf, default_config)
+
 }
