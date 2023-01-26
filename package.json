@@ -4,18 +4,18 @@
   "version": "1.4.8",
   "description": "webdav server with bonjour and command integrations",
   "type": "module",
-  "main": "./webdav-runner/cli.js",
+  "main": "./bin/cli.js",
   "bin": {
     "webdav-runner": "./bin/cli.js"
   },
   "scripts": {
-    "help": "node ./webdav-runner/cli.js help",
-    "server": "node ./webdav-runner/cli.js server",
-    "setup": "node ./webdav-runner/cli.js setup",
-    "startup": "node ./webdav-runner/cli.js startup",
-    "startdown": "node ./webdav-runner/cli.js startdown",
-    "renew_certs": "node ./webdav-runner/cli.js renew_certs",
-    "accept_certs": "node ./webdav-runner/cli.js accept_certs",
+    "help": "node ./bin/cli.js help",
+    "server": "node ./bin/cli.js server",
+    "setup": "node ./bin/cli.js setup",
+    "startup": "node ./bin/cli.js startup",
+    "startdown": "node ./bin/cli.js startdown",
+    "renew_certs": "node ./bin/cli.js renew_certs",
+    "accept_certs": "node ./bin/cli.js accept_certs",
     "lint": "prettier ./webdav-runner --write --no-semi --tab-width 4 --arrow-parens avoid && eslint ./webdav-runner/** --fix --ext .js"
   },
   "author": "riccardo di virgilio",
