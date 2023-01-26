@@ -62,7 +62,7 @@ const dump_current_config = config => {
     return result
 }
 
-const argv = minimist(process.argv.slice(2))
+
 
 const subcommands = {
     help: async () =>
@@ -134,16 +134,22 @@ const subcommands = {
     },
 }
 
-const command = argv._[0]
+export default argv => {
 
-if (argv._.length > 1) {
-    console.error("no positional arguments are allowed: ", ...argv._.slice(1))
-} else {
-    delete argv._
-}
+    const parsed = minimist(argv)
 
-if (command && subcommands[command]) {
-    subcommands[command](make_config(argv))
-} else {
-    subcommands["help"](make_config(argv))
+    const command = parsed._[0]
+
+    if (parsed._.length > 1) {
+        console.error("no positional arguments are allowed: ", ...parsed._.slice(1))
+    } else {
+        delete parsed._
+    }
+
+    if (command && subcommands[command]) {
+        subcommands[command](make_config(parsed))
+    } else {
+        subcommands["help"](make_config(parsed))
+    }
+
 }

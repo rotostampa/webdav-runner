@@ -1,3 +1,5 @@
 #!/usr/bin/env node
 
-import '../webdav-runner/cli.js'
+import cli from '../webdav-runner/cli.js'
+
+cli(process.argv.slice(2))
