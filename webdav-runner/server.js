@@ -288,7 +288,7 @@ export default config => {
     app.use(webdav.extensions.express("/", server))
 
     https.createServer(settings.https, app).listen(settings.port, () => {
-        console.info("🥷 server listening on:")
+        console.info(`🥷 server version ${pkg.version} listening on:`)
         console.info(`   https://localhost:${settings.port}/`)
         console.info(
             `   https://${proxyprefix}${bonjour.name}${proxydomain}:${settings.port}/`
