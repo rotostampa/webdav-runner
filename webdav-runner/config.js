@@ -1,4 +1,11 @@
-export default {
+
+import {
+    expand_path, json_loads, read_file
+} from "../webdav-runner/utils.js"
+
+import fs from 'fs'
+
+const default_config = {
     configuration: "~/.webdav-runner/config.json",
     certificates: {
         key: "~/.webdav-runner/ssl.key",
@@ -42,4 +49,54 @@ export default {
         log: "~/.webdav-runner/webdav-runner.log",
         name: "webdav-runner",
     },
+}
+
+
+const traverse_config = (configs, ...args) => {
+    for (const current of configs) {
+        let result = current
+
+        loop: for (const key of args) {
+            if (result && typeof result[key] !== "undefined") {
+                result = result[key]
+            } else {
+                result = null
+                break loop
+            }
+        }
+
+        if (result) {
+            return result
+        }
+    }
+}
+
+
+const dump_config = config => {
+    const result = {}
+    for (const [key, values] of Object.entries(default_config)) {
+        if (key == "configuration") {
+            result[key] = config(key)
+        } else {
+            result[key] = {}
+            for (const subk of Object.keys(values)) {
+                result[key][subk] = config(key, subk)
+            }
+        }
+    }
+    return result
+}
+
+
+export const make_config = cliconf => {
+    const file = expand_path(
+        cliconf.configuration || default_config.configuration
+    )
+    let fileconf = {}
+
+    if (fs.existsSync(file)) {
+        fileconf = json_loads(read_file(file))
+    }
+    return dump_config((...args) =>
+        traverse_config([cliconf, fileconf, default_config], ...args))
 }

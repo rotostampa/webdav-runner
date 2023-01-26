@@ -55,13 +55,13 @@ const SERVICES = {
 function bonjour_advertise(config) {
     const settings = {
         name:
-            config("bonjour", "name") ||
+            config.bonjour.name ||
             machine_id.machineIdSync({ original: true }),
-        type: config("bonjour", "type"),
-        port: config("bonjour", "port"),
+        type: config.bonjour.type,
+        port: config.bonjour.port,
         txt: {
             platform: process.platform,
-            port: config("webdav", "port"),
+            port: config.webdav.port,
             version: pkg.version,
         },
     }
@@ -81,7 +81,7 @@ export default config => {
     const users = {}
 
     for (const [username, password] of Object.entries(
-        config("webdav", "users")
+        config.webdav.users
     )) {
         users[username] = user_manager.addUser(username, password, false)
     }
@@ -89,9 +89,9 @@ export default config => {
     const privilege_manager = new webdav.SimplePathPrivilegeManager()
 
     const temp = expand_path(
-        config("webdav", "storage"),
-        `${config("webdav", "port")}`,
-        `${config("bonjour", "port")}`
+        config.webdav.storage,
+        `${config.webdav.port}`,
+        `${config.bonjour.port}`
     )
 
     const certs = find_existing_certs(config)
@@ -102,8 +102,8 @@ export default config => {
             "realm"
         ),
         privilegeManager: privilege_manager,
-        port: config("webdav", "port"),
-        hostname: config("webdav", "hostname"),
+        port: config.webdav.port,
+        hostname: config.webdav.hostname,
         withCredentials: true,
         https: {
             key: read_file(certs.key),
@@ -121,7 +121,7 @@ export default config => {
 
     const server = new webdav.WebDAVServer(settings)
 
-    const folders = config("webdav", "folders")
+    const folders = config.webdav.folders
     const context = {
         server,
         users,
@@ -151,7 +151,7 @@ export default config => {
 
     const servers = {}
 
-    Bonjour().find({ type: config("bonjour", "type") }, e => {
+    Bonjour().find({ type: config.bonjour.type }, e => {
         delete e.rawTxt
         servers[e.name] = {
             proxy: `https://${proxyprefix}${e.name}${proxydomain}:${e.txt.port}/`,
@@ -162,13 +162,13 @@ export default config => {
 
     const app = express()
 
-    let proxydomain = config("proxy", "domain")
+    let proxydomain = config.proxy.domain
     if (!startswith(proxydomain, ".")) {
         proxydomain = "." + proxydomain
     }
-    const proxyprefix = config("proxy", "prefix")
+    const proxyprefix = config.proxy.prefix
     const proxy = httpproxy.createProxyServer({
-        secure: config("proxy", "secure") ? true : false,
+        secure: config.proxy.secure ? true : false,
         ignorePath: true,
     }) // See (†)
 
@@ -238,7 +238,7 @@ export default config => {
         })
     })
 
-    const jwt_secret = config("execute", "secret")
+    const jwt_secret = config.execute.secret
 
     if (jwt_secret) {
         //console.info("sample jwt request")

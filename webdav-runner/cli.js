@@ -1,6 +1,6 @@
 import startup from "../startup/startup.js"
 import { renew_certs } from "../webdav-runner/certs.js"
-import default_config from "../webdav-runner/config.js"
+import {make_config} from "../webdav-runner/config.js"
 import server from "../webdav-runner/server.js"
 import {
     read_file,
@@ -15,67 +15,21 @@ import minimist from "minimist"
 import os from "os"
 import path from "path"
 
-const traverse_config = (configs, ...args) => {
-    for (const current of configs) {
-        let result = current
-
-        loop: for (const key of args) {
-            if (result && typeof result[key] !== "undefined") {
-                result = result[key]
-            } else {
-                result = null
-                break loop
-            }
-        }
-
-        if (result) {
-            return result
-        }
-    }
-}
-
-const make_config = cliconf => {
-    const file = expand_path(
-        cliconf.configuration || default_config.configuration
-    )
-    let fileconf = {}
-
-    if (fs.existsSync(file)) {
-        fileconf = json_loads(read_file(file))
-    }
-    return (...args) =>
-        traverse_config([cliconf, fileconf, default_config], ...args)
-}
-
-const dump_current_config = config => {
-    const result = {}
-    for (const [key, values] of Object.entries(default_config)) {
-        if (key == "configuration") {
-            result[key] = config(key)
-        } else {
-            result[key] = {}
-            for (const subk of Object.keys(values)) {
-                result[key][subk] = config(key, subk)
-            }
-        }
-    }
-    return result
-}
 
 const subcommands = {
     help: async () =>
         console.info(`available commands: ${Object.keys(subcommands)}`),
     server: async config => await server(config),
     setup: async config => {
-        const localconfig = expand_path(config("configuration"))
-        console.info("creating conf under", localconfig)
-        ensure_dir(path.dirname(localconfig))
-        write_json(localconfig, dump_current_config(config))
+        const file = expand_path(config.configuration)
+        console.info("creating conf:", config)
+        ensure_dir(path.dirname(file))
+        write_json(file, config)
     },
     renew_certs: async config => await renew_certs(config),
 
     accept_certs: async config => {
-        const cert = config("certificates", "cert")
+        const cert = config.certificates.cert
 
         if (cert) {
             if (!fs.existsSync(expand_path(cert))) {
@@ -97,6 +51,9 @@ const subcommands = {
     },
 
     startup: async config => {
+
+        console.log(config)
+
         const process_exe = process.execPath
         const process_args = [
             process.argv[1],
@@ -115,17 +72,17 @@ const subcommands = {
 
         console.info("registering at startup", process_exe, ...process_args)
 
-        library.remove(config("startup", "name"))
+        library.remove(config.startup.name)
         library.create(
-            config("startup", "name"), // id
+            config.startup.name, // id
             process_exe, // cmd
             process_args,
-            expand_path(config("startup", "log"))
+            expand_path(config.startup.log)
         )
     },
     startdown: async config => {
         const library = await startup
-        library.remove(config("startup", "name"))
+        library.remove(config.startup.name)
     },
 }
 
