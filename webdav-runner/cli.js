@@ -70,12 +70,9 @@ const subcommands = {
     server: async config => await server(config),
     setup: async config => {
         const localconfig = expand_path(config("configuration"))
-
-        if (!fs.existsSync(localconfig)) {
-            console.info("creating conf under", localconfig)
-            ensure_dir(path.dirname(localconfig))
-            write_json(localconfig, dump_current_config(config))
-        }
+        console.info("creating conf under", localconfig)
+        ensure_dir(path.dirname(localconfig))
+        write_json(localconfig, dump_current_config(config))
     },
     renew_certs: async config => await renew_certs(config),
 
