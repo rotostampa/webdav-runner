@@ -7,6 +7,9 @@ import {
     endswith,
     local_path,
 } from "../webdav-runner/utils.js"
+
+import {find_existing_certs}  from "../webdav-runner/certs.js"
+
 import Bonjour from "bonjour"
 import { execFile as exec_file } from "child_process"
 import express from "express"
@@ -72,10 +75,6 @@ function bonjour_advertise(config) {
     return settings
 }
 
-function get_certificate_path(config, key) {
-    const p = expand_path(config("certificates", key))
-    return fs.existsSync(p) ? p : local_path(`../certs/self-signed.${key}.pem`)
-}
 
 export default config => {
     const bonjour = bonjour_advertise(config)
@@ -100,8 +99,8 @@ export default config => {
         `${config("bonjour", "port")}`
     )
 
-    const ssl_key = get_certificate_path(config, "key")
-    const ssl_cert = get_certificate_path(config, "cert")
+    const certs = find_existing_certs(config)
+
 
     const settings = {
         httpAuthentication: new webdav.HTTPBasicAuthentication(
@@ -113,8 +112,8 @@ export default config => {
         hostname: config("webdav", "hostname"),
         withCredentials: true,
         https: {
-            key: read_file(ssl_key),
-            cert: read_file(ssl_cert),
+            key: read_file(certs.key),
+            cert: read_file(certs.cert),
         },
         maxRequestDepth: Infinity,
         //headers: {
@@ -303,7 +302,7 @@ export default config => {
         )
 
         console.info()
-        console.info("   ssl_key:", ssl_key)
-        console.info("   ssl_cert:", ssl_cert)
+        console.info("   ssl_key:", certs.key)
+        console.info("   ssl_cert:", certs.cert)
     })
 }

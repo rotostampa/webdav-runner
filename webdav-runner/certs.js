@@ -38,23 +38,27 @@ const make_cert = config =>
         )
     )
 
-export const ensure_certs = async (config, renew) => {
-    const cert = {
-        key: expand_path(config("certificates", "key")),
-        cert: expand_path(config("certificates", "cert")),
+export const find_existing_certs = (config) =>  {
+    const certs = {}
+    for (const key in ['key', 'cert']) {
+        const p = expand_path(config("certificates", key))
+        certs[key] = fs.existsSync(p) ? p : local_path(`../certs/self-signed.${key}.pem`)   
     }
+    return certs
+}
 
-    console.info("creating certs", cert)
+export const renew_certs = async (config) => {
 
-    if (!fs.existsSync(cert.key) || !fs.existsSync(cert.cert) || renew) {
-        const newcert = await make_cert(config)
+    const key = expand_path(config("certificates", "key"))
+    const cert = expand_path(config("certificates", "cert"))
 
-        ensure_dir(path.dirname(cert.key))
-        ensure_dir(path.dirname(cert.cert))
+    const {key: key_string, cert: cert_string} = await make_cert(config)
 
-        write_file(cert.key, newcert.key)
-        write_file(cert.cert, newcert.cert)
-    }
+    ensure_dir(path.dirname(key))
+    ensure_dir(path.dirname(cert))
 
-    return cert
+    write_file(key, key_string)
+    write_file(cert, cert_string)
+
+    return {key, cert}
 }

@@ -1,5 +1,5 @@
 import startup from "../startup/startup.js"
-import { ensure_certs } from "../webdav-runner/certs.js"
+import { renew_certs, find_existing_certs } from "../webdav-runner/certs.js"
 import default_config from "../webdav-runner/config.js"
 import server from "../webdav-runner/server.js"
 import {
@@ -11,6 +11,7 @@ import {
 } from "../webdav-runner/utils.js"
 import { execFile as exec_file } from "child_process"
 import fs from "fs"
+import os from "os"
 import minimist from "minimist"
 import path from "path"
 
@@ -61,16 +62,33 @@ const subcommands = {
             write_json(localconfig, default_config)
         }
     },
-    certificates: async config => {
-        const { cert } = await ensure_certs(config, true)
+    renew_certs: async config => await renew_certs(config),
 
-        if (process.platform == "darwin") {
-            exec_file("/usr/bin/security", [
-                "add-trusted-cert",
-                expand_path(cert),
-            ])
+    accept_certs: async config => {
+        const cert = config("certificates", 'cert')
+
+        if (cert) {
+
+            if (! fs.existsSync(expand_path(cert))) {
+                console.error('non existing cert: ', cert)
+                process.exit(1)
+            }
+
+            console.log('accepting cert', expand_path(cert))
+
+            if (process.platform == "darwin") {
+                exec_file("/usr/bin/security", [
+                    "add-trusted-cert",
+                    expand_path(cert),
+                ])
+            } else {
+                console.error('not implemented for platform:', os.platform())
+            }
         }
+
+
     },
+
     startup: async config => {
         const process_exe = process.execPath
         const process_args = [
