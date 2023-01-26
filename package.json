@@ -15,8 +15,7 @@
     "startup": "node ./webdav-runner/cli.js startup",
     "startdown": "node ./webdav-runner/cli.js startdown",
     "certificates": "node ./webdav-runner/cli.js certificates",
-    "lint": "prettier ./webdav-runner --write --no-semi --tab-width 4 --arrow-parens avoid && eslint ./webdav-runner/** --fix --ext .js",
-    "update": "npm install -g webdav-runner@latest"
+    "lint": "prettier ./webdav-runner --write --no-semi --tab-width 4 --arrow-parens avoid && eslint ./webdav-runner/** --fix --ext .js"
   },
   "author": "riccardo di virgilio",
   "license": "ISC",
