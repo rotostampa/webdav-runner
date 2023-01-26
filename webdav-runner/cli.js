@@ -1,6 +1,6 @@
 import startup from "../startup/startup.js"
 import { renew_certs } from "../webdav-runner/certs.js"
-import {make_config} from "../webdav-runner/config.js"
+import { make_config } from "../webdav-runner/config.js"
 import server from "../webdav-runner/server.js"
 import {
     read_file,
@@ -14,7 +14,6 @@ import fs from "fs"
 import minimist from "minimist"
 import os from "os"
 import path from "path"
-
 
 const subcommands = {
     help: async () =>
@@ -51,7 +50,6 @@ const subcommands = {
     },
 
     startup: async config => {
-
         console.log(config)
 
         const process_exe = process.execPath

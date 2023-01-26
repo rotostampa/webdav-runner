@@ -55,8 +55,7 @@ const SERVICES = {
 function bonjour_advertise(config) {
     const settings = {
         name:
-            config.bonjour.name ||
-            machine_id.machineIdSync({ original: true }),
+            config.bonjour.name || machine_id.machineIdSync({ original: true }),
         type: config.bonjour.type,
         port: config.bonjour.port,
         txt: {
@@ -80,9 +79,7 @@ export default config => {
 
     const users = {}
 
-    for (const [username, password] of Object.entries(
-        config.webdav.users
-    )) {
+    for (const [username, password] of Object.entries(config.webdav.users)) {
         users[username] = user_manager.addUser(username, password, false)
     }
 

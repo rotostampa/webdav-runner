@@ -1,9 +1,5 @@
-
-import {
-    expand_path, json_loads, read_file
-} from "../webdav-runner/utils.js"
-
-import fs from 'fs'
+import { expand_path, json_loads, read_file } from "../webdav-runner/utils.js"
+import fs from "fs"
 
 const default_config = {
     configuration: "~/.webdav-runner/config.json",
@@ -51,7 +47,6 @@ const default_config = {
     },
 }
 
-
 const traverse_config = (configs, keys) => {
     for (const current of configs) {
         let result = current
@@ -71,12 +66,10 @@ const traverse_config = (configs, keys) => {
     }
 }
 
-
 const dump_config = (...configs) => {
-
     const getter = (...keys) => traverse_config(configs, keys)
     const result = {}
-    
+
     for (const [key, values] of Object.entries(default_config)) {
         if (key == "configuration") {
             result[key] = getter(key)
@@ -90,7 +83,6 @@ const dump_config = (...configs) => {
     return result
 }
 
-
 export const make_config = cliconf => {
     const file = expand_path(
         cliconf.configuration || default_config.configuration
@@ -98,5 +90,4 @@ export const make_config = cliconf => {
     const fileconf = fs.existsSync(file) ? json_loads(read_file(file)) : {}
 
     return dump_config(cliconf, fileconf, default_config)
-
 }
