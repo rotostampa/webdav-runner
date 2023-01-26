@@ -1,4 +1,4 @@
-import { write_file, expand_path, ensure_dir } from "../webdav-runner/utils.js"
+import { write_file, expand_path, ensure_dir, local_path } from "../webdav-runner/utils.js"
 import fs from "fs"
 import path from "path"
 import pem from "pem"
@@ -40,7 +40,7 @@ const make_cert = config =>
 
 export const find_existing_certs = (config) =>  {
     const certs = {}
-    for (const key in ['key', 'cert']) {
+    for (const key of ['key', 'cert']) {
         const p = expand_path(config("certificates", key))
         certs[key] = fs.existsSync(p) ? p : local_path(`../certs/self-signed.${key}.pem`)   
     }
