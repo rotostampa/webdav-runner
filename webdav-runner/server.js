@@ -1,3 +1,4 @@
+import pkg from "../webdav-runner/pkg.js"
 import {
     ensure_dir,
     expand_path,
@@ -62,6 +63,7 @@ function bonjour_advertise(config) {
         txt: {
             platform: process.platform,
             port: config("webdav", "port"),
+            version: pkg.version,
         },
     }
 
@@ -236,6 +238,7 @@ export default config => {
             success: true,
             status: 200,
             platform: process.platform,
+            version: pkg.version,
             name: bonjour.name,
             folders,
             servers,
