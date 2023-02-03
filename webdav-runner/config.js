@@ -4,6 +4,7 @@ import fs from "fs"
 const default_config = {
     configuration: "~/.webdav-runner/config.json",
     certificates: {
+        secure: true,
         key: "~/.webdav-runner/ssl.key",
         cert: "~/.webdav-runner/ssl.cert",
     },
@@ -56,12 +57,12 @@ const traverse_config = (configs, keys) => {
             if (result && typeof result[key] !== "undefined") {
                 result = result[key]
             } else {
-                result = null
+                result = undefined
                 break loop
             }
         }
 
-        if (result) {
+        if (result != undefined) {
             return result
         }
     }

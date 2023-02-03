@@ -12,6 +12,8 @@ import { execFile as exec_file } from "child_process"
 import express from "express"
 import httpproxy from "http-proxy"
 import https from "https"
+import http from "http"
+
 import jwt from "jsonwebtoken"
 import machine_id from "node-machine-id"
 import { v2 as webdav } from "webdav-server"
@@ -62,6 +64,7 @@ function bonjour_advertise(config) {
             platform: process.platform,
             port: config.proxy.port || config.webdav.port,
             version: pkg.version,
+            protocol: config.certificates.secure ? 'https' : 'http'
         },
     }
 
@@ -71,6 +74,9 @@ function bonjour_advertise(config) {
 }
 
 export default config => {
+
+    const protocol = config.certificates.secure ? 'https' : 'http'
+
     const bonjour = bonjour_advertise(config)
 
     console.info("started bonjour using", bonjour)
@@ -102,10 +108,10 @@ export default config => {
         port: config.webdav.port,
         hostname: config.webdav.hostname,
         withCredentials: true,
-        https: {
+        https: config.certificates.secure ? {
             key: read_file(certs.key),
             cert: read_file(certs.cert),
-        },
+        } : null,
         maxRequestDepth: Infinity,
         //headers: {
         //  "Access-Control-Allow-Origin": "*",
@@ -151,7 +157,7 @@ export default config => {
     Bonjour().find({ type: config.bonjour.type }, e => {
         delete e.rawTxt
         servers[e.name] = {
-            proxy: `https://${proxyprefix}${e.name}${proxydomain}:${e.txt.port}/`,
+            proxy: `${e.txt.protocol}://${proxyprefix}${e.name}${proxydomain}:${e.txt.port}/`,
             address: e.referer.address,
             ...e.txt,
         }
@@ -180,12 +186,15 @@ export default config => {
             "Accept, Authorization, Content-Type, Content-Length, Depth, X-Requested-With"
         )
 
+
+
         // proxy logic
         if (
-            endswith(req.socket.servername, proxydomain) &&
-            startswith(req.socket.servername, proxyprefix)
+            req.hostname && 
+            endswith(req.hostname, proxydomain) &&
+            startswith(req.hostname, proxyprefix)
         ) {
-            const proxyname = req.socket.servername.slice(
+            const proxyname = req.hostname.slice(
                 proxyprefix.length,
                 -proxydomain.length
             )
@@ -195,7 +204,7 @@ export default config => {
             if (target && proxyname == bonjour.name) {
                 console.info("proxy to self, skipping")
             } else if (target) {
-                const url = `https://${target.address}:${target.port}${req.path}`
+                const url = `${target.txt.protocol}://${target.address}:${target.port}${req.path}`
                 console.info("forwarding to", url)
                 proxy.web(req, res, { target: url }, e => {
                     res.status(502)
@@ -219,7 +228,7 @@ export default config => {
         console.info(
             "🤖",
             req.method,
-            `https://${req.socket.servername}:${settings.port}${req.path}`
+            `${protocol}://${req.hostname}:${settings.port}${req.path}`
         )
     })
 
@@ -284,15 +293,23 @@ export default config => {
 
     app.use(webdav.extensions.express("/", server))
 
-    https.createServer(settings.https, app).listen(settings.port, () => {
+    console.log('settings', settings.https)
+
+    const s = settings.https ? https.createServer(settings.https, app) : http.createServer(app)
+
+    s.listen(settings.port, () => {
         console.info(`🥷 server version ${pkg.version} listening on:`)
-        console.info(`   https://localhost:${settings.port}/`)
+        console.info(`   ${protocol}://localhost:${settings.port}/`)
         console.info(
-            `   https://${proxyprefix}${bonjour.name}${proxydomain}:${settings.port}/`
+            `   ${protocol}://${proxyprefix}${bonjour.name}${proxydomain}:${settings.port}/`
         )
 
-        console.info()
-        console.info("   ssl_key:", certs.key)
-        console.info("   ssl_cert:", certs.cert)
+        if (settings.https) {
+            console.info()
+            console.info("   ssl_key:", settings.https.key)
+            console.info("   ssl_cert:", settings.https.cert)            
+        }
+
+
     })
 }
