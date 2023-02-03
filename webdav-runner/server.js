@@ -293,7 +293,6 @@ export default config => {
 
     app.use(webdav.extensions.express("/", server))
 
-    console.log('settings', settings.https)
 
     const s = settings.https ? https.createServer(settings.https, app) : http.createServer(app)
 
@@ -304,11 +303,6 @@ export default config => {
             `   ${protocol}://${proxyprefix}${bonjour.name}${proxydomain}:${settings.port}/`
         )
 
-        if (settings.https) {
-            console.info()
-            console.info("   ssl_key:", settings.https.key)
-            console.info("   ssl_cert:", settings.https.cert)            
-        }
 
 
     })
