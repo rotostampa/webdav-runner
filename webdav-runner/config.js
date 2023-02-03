@@ -40,6 +40,7 @@ const default_config = {
         domain: "localtest.me",
         prefix: "webdav-",
         secure: false,
+        port: null,
     },
     startup: {
         log: "~/.webdav-runner/webdav-runner.log",
