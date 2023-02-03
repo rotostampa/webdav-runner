@@ -60,7 +60,7 @@ function bonjour_advertise(config) {
         port: config.bonjour.port,
         txt: {
             platform: process.platform,
-            port: config.webdav.port,
+            port: config.proxy.port || config.webdav.port,
             version: pkg.version,
         },
     }
