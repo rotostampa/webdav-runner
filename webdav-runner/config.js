@@ -8,6 +8,7 @@ const default_config = {
         port: 1900,
         key: "~/.webdav-runner/ssl.key",
         cert: "~/.webdav-runner/ssl.cert",
+        host: '0.0.0.0',
     },
     webdav: {
         users: {

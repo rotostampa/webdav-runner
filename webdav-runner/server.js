@@ -105,13 +105,13 @@ export default config => {
             "realm"
         ),
         privilegeManager: privilege_manager,
-        port: config.http.port,
-        hostname: config.webdav.hostname,
         withCredentials: true,
         https: config.http.secure ? {
             key: read_file(certs.key),
             cert: read_file(certs.cert),
         } : null,
+        port: config.http.port,
+        host: config.http.host,
         maxRequestDepth: Infinity,
         //headers: {
         //  "Access-Control-Allow-Origin": "*",
@@ -296,9 +296,9 @@ export default config => {
 
     const s = settings.https ? https.createServer(settings.https, app) : http.createServer(app)
 
-    s.listen(settings.port, () => {
+    s.listen(settings, () => {
         console.info(`🥷 server version ${pkg.version} listening on:`)
-        console.info(`   ${protocol}://localhost:${settings.port}/`)
+        console.info(`   ${protocol}://${settings.host}:${settings.port}/`)
         console.info(
             `   ${protocol}://${proxyprefix}${bonjour.name}${proxydomain}:${settings.port}/`
         )
