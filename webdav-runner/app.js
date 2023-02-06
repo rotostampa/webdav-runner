@@ -217,6 +217,13 @@ export default config => {
     })
 
     app.get("/manifest", (req, res) => {
+
+
+        res.set(
+            "Cache-Control",
+            "max-age=3600"
+        )
+
         res.send({
             success: true,
             status: 200,
