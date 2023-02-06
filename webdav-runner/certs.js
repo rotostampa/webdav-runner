@@ -46,7 +46,7 @@ const make_cert = config =>
 export const find_existing_certs = config => {
     const certs = {}
     for (const key of ["key", "cert"]) {
-        const p = expand_path(config.certificates[key])
+        const p = expand_path(config.http[key])
         certs[key] = fs.existsSync(p)
             ? p
             : local_path(import.meta, `../certs/self-signed.${key}.pem`)
@@ -55,8 +55,8 @@ export const find_existing_certs = config => {
 }
 
 export const renew_certs = async config => {
-    const key = expand_path(config.certificates.key)
-    const cert = expand_path(config.certificates.cert)
+    const key = expand_path(config.http.key)
+    const cert = expand_path(config.http.cert)
 
     const { key: key_string, cert: cert_string } = await make_cert(config)
 

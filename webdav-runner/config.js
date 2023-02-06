@@ -3,13 +3,13 @@ import fs from "fs"
 
 const default_config = {
     configuration: "~/.webdav-runner/config.json",
-    certificates: {
+    http: {
         secure: true,
+        port: 1900,
         key: "~/.webdav-runner/ssl.key",
         cert: "~/.webdav-runner/ssl.cert",
     },
     webdav: {
-        port: 1900,
         users: {
             admin: "admin",
             user: "user",

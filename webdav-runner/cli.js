@@ -22,7 +22,7 @@ const subcommands = {
     renew_certs: async config => await renew_certs(config),
 
     accept_certs: async config => {
-        const cert = config.certificates.cert
+        const cert = config.http.cert
 
         if (cert) {
             if (!fs.existsSync(expand_path(cert))) {

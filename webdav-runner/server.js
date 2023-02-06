@@ -62,9 +62,9 @@ function bonjour_advertise(config) {
         port: config.bonjour.port,
         txt: {
             platform: process.platform,
-            port: config.proxy.port || config.webdav.port,
+            port: config.proxy.port || config.http.port,
             version: pkg.version,
-            protocol: config.certificates.secure ? 'https' : 'http'
+            protocol: config.http.secure ? 'https' : 'http'
         },
     }
 
@@ -75,7 +75,7 @@ function bonjour_advertise(config) {
 
 export default config => {
 
-    const protocol = config.certificates.secure ? 'https' : 'http'
+    const protocol = config.http.secure ? 'https' : 'http'
 
     const bonjour = bonjour_advertise(config)
 
@@ -93,7 +93,7 @@ export default config => {
 
     const temp = expand_path(
         config.webdav.storage,
-        `${config.webdav.port}`,
+        `${config.http.port}`,
         `${config.bonjour.port}`
     )
 
@@ -105,10 +105,10 @@ export default config => {
             "realm"
         ),
         privilegeManager: privilege_manager,
-        port: config.webdav.port,
+        port: config.http.port,
         hostname: config.webdav.hostname,
         withCredentials: true,
-        https: config.certificates.secure ? {
+        https: config.http.secure ? {
             key: read_file(certs.key),
             cert: read_file(certs.cert),
         } : null,
