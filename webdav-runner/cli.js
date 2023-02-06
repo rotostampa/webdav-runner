@@ -1,6 +1,6 @@
 import startup from "../startup/startup.js"
 import { renew_certs } from "../webdav-runner/certs.js"
-import { make_config } from "../webdav-runner/config.js"
+import make_config from "../webdav-runner/config.js"
 import server from "../webdav-runner/server.js"
 import { ensure_dir, expand_path, write_json } from "../webdav-runner/utils.js"
 import { execFile as exec_file } from "child_process"
@@ -20,7 +20,6 @@ const subcommands = {
         write_json(file, config)
     },
     renew_certs: async config => await renew_certs(config),
-
     accept_certs: async config => {
         const cert = config.http.cert
 
@@ -42,7 +41,6 @@ const subcommands = {
             }
         }
     },
-
     startup: async config => {
         console.log(config)
 

@@ -86,7 +86,7 @@ const dump_config = (...configs) => {
     return result
 }
 
-export const make_config = cliconf => {
+export default cliconf => {
     const file = expand_path(
         cliconf.configuration || default_config.configuration
     )
