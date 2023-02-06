@@ -117,7 +117,11 @@ export default config => {
         config,
     }
 
-    for (const settings of folders) {
+
+    for (const settings of Object.values(folders)) {
+
+
+
         if (!settings.type) {
             settings.type = "filesystem"
         }

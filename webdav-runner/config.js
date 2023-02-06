@@ -16,8 +16,8 @@ const default_config = {
             user: "user",
         },
         storage: "~/.webdav-runner",
-        folders: [
-            {
+        folders: {
+            storage: {
                 path: "/",
                 mount: "~/Storage",
                 type: "filesystem",
@@ -27,8 +27,8 @@ const default_config = {
                     user: "read",
                 },
                 cleanup: false,
-            },
-        ],
+            }
+        },
     },
     bonjour: {
         port: 1923,
