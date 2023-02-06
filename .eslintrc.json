@@ -4,6 +4,7 @@
         "es2021": true
     },
     "extends": "eslint:recommended",
+    "plugins": ["eslint-plugin-unused-imports", "eslint-plugin-import"],
     "overrides": [
     ],
     "parserOptions": {
@@ -11,5 +12,6 @@
         "sourceType": "module"
     },
     "rules": {
+        "unused-imports/no-unused-imports": "error"
     }
 }

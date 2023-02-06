@@ -26,15 +26,16 @@
     "http-proxy": "^1.18.1",
     "jsonwebtoken": "^9.0.0",
     "minimist": "^1.2.7",
+    "mkdirp": "^0.5.1",
     "node-machine-id": "^1.1.12",
     "pem": "^1.14.6",
-    "webdav-server": "^2.6.2",
-    "mkdirp": "^0.5.1",
-    "untildify": "^2.1.0"
+    "untildify": "^2.1.0",
+    "webdav-server": "^2.6.2"
   },
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^4.0.0",
     "eslint": "^8.32.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-unused-imports": "^2.0.0",
     "prettier": "^2.8.3"
   }
 }

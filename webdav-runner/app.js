@@ -1,9 +1,9 @@
 import pkg from "../webdav-runner/pkg.js"
 import {
+    endswith,
     ensure_dir,
     expand_path,
     startswith,
-    endswith,
 } from "../webdav-runner/utils.js"
 import Bonjour from "bonjour"
 import { execFile as exec_file } from "child_process"
