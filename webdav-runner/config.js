@@ -27,7 +27,7 @@ const default_config = {
                     user: "read",
                 },
                 cleanup: false,
-            }
+            },
         },
     },
     bonjour: {

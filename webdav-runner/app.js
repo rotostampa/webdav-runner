@@ -74,6 +74,7 @@ export default config => {
     console.info("started bonjour using", bonjour)
 
     const user_manager = new webdav.SimpleUserManager()
+    const privilege_manager = new webdav.SimplePathPrivilegeManager()
 
     const users = {}
 
@@ -81,35 +82,22 @@ export default config => {
         users[username] = user_manager.addUser(username, password, false)
     }
 
-    const privilege_manager = new webdav.SimplePathPrivilegeManager()
-
     const temp = expand_path(
         config.webdav.storage,
         `${config.http.port}`,
         `${config.bonjour.port}`
     )
 
-    const settings = {
+    const server = new webdav.WebDAVServer({
         httpAuthentication: new webdav.HTTPBasicAuthentication(
             user_manager,
             "realm"
         ),
         privilegeManager: privilege_manager,
         withCredentials: true,
-
         maxRequestDepth: Infinity,
-        //headers: {
-        //  "Access-Control-Allow-Origin": "*",
-        //  "Access-Control-Allow-Methods":
-        //    "HEAD, GET, PUT, PROPFIND, DELETE, OPTIONS, MKCOL, MOVE, COPY",
-        //  "Access-Control-Allow-Headers":
-        //    "Accept, Authorization, Content-Type, Content-Length, Depth",
-        //},
-    }
+    })
 
-    const server = new webdav.WebDAVServer(settings)
-
-    const folders = config.webdav.folders
     const context = {
         server,
         users,
@@ -117,11 +105,7 @@ export default config => {
         config,
     }
 
-
-    for (const settings of Object.values(folders)) {
-
-
-
+    for (const settings of Object.values(config.webdav.folders)) {
         if (!settings.type) {
             settings.type = "filesystem"
         }
@@ -146,7 +130,7 @@ export default config => {
     Bonjour().find({ type: config.bonjour.type }, e => {
         delete e.rawTxt
         servers[e.name] = {
-            proxy: `${e.txt.protocol}://${proxyprefix}${e.name}${proxydomain}:${e.txt.port}/`,
+            proxy: `${e.txt.protocol}://${config.proxy.prefix}${e.name}${config.proxy.domain}:${e.txt.port}/`,
             address: e.referer.address,
             ...e.txt,
         }
@@ -154,11 +138,6 @@ export default config => {
 
     const app = express()
 
-    let proxydomain = config.proxy.domain
-    if (!startswith(proxydomain, ".")) {
-        proxydomain = "." + proxydomain
-    }
-    const proxyprefix = config.proxy.prefix
     const proxy = httpproxy.createProxyServer({
         secure: config.proxy.secure ? true : false,
         ignorePath: true,
@@ -178,12 +157,12 @@ export default config => {
         // proxy logic
         if (
             req.hostname &&
-            endswith(req.hostname, proxydomain) &&
-            startswith(req.hostname, proxyprefix)
+            endswith(req.hostname, config.proxy.domain) &&
+            startswith(req.hostname, config.proxy.prefix)
         ) {
             const proxyname = req.hostname.slice(
-                proxyprefix.length,
-                -proxydomain.length
+                config.proxy.prefix.length,
+                -config.proxy.domain.length
             )
 
             const target = servers[proxyname]
@@ -216,17 +195,12 @@ export default config => {
         console.info(
             "🤖",
             req.method,
-            `${protocol}://${req.hostname}:${settings.port}${req.path}`
+            `${protocol}://${req.hostname}:${config.http.port}${req.path}`
         )
     })
 
     app.get("/manifest", (req, res) => {
-
-
-        res.set(
-            "Cache-Control",
-            "max-age=3600"
-        )
+        res.set("Cache-Control", "max-age=3600")
 
         res.send({
             success: true,
@@ -234,21 +208,19 @@ export default config => {
             platform: process.platform,
             version: pkg.version,
             name: bonjour.name,
-            folders,
+            folders: config.webdav.folders,
             servers,
         })
     })
 
-    const jwt_secret = config.execute.secret
-
-    if (jwt_secret) {
+    if (config.execute.secret) {
         //console.info("sample jwt request")
         //console.info(`curl https://localhost:${settings.port}/execute/${jwt.sign({ command: "npm", arguments: ["install", '-g', 'webdav-runner@latest'] }, jwt_secret)}/ --insecure`)
 
         app.get("/execute/:jwt", (req, res) => {
             let result
             try {
-                result = jwt.verify(req.params.jwt, jwt_secret)
+                result = jwt.verify(req.params.jwt, config.execute.secret)
             } catch (e) {
                 console.info("invalid jwt", e)
             }
