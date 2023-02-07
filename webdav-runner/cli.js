@@ -1,13 +1,14 @@
-import startup from "../startup/startup.js"
-import { renew_certs } from "../webdav-runner/certs.js"
-import make_config from "../webdav-runner/config.js"
-import server from "../webdav-runner/server.js"
-import { ensure_dir, expand_path, write_json } from "../webdav-runner/utils.js"
 import { execFile as exec_file } from "child_process"
 import fs from "fs"
 import minimist from "minimist"
 import os from "os"
 import path from "path"
+
+import startup from "../startup/startup.js"
+import { renew_certs } from "../webdav-runner/certs.js"
+import make_config from "../webdav-runner/config.js"
+import server from "../webdav-runner/server.js"
+import { ensure_dir, expand_path, write_json } from "../webdav-runner/utils.js"
 
 const subcommands = {
     help: async () =>

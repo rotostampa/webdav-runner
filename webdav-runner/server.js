@@ -1,9 +1,10 @@
+import http from "http"
+import https from "https"
+
 import make_app from "../webdav-runner/app.js"
 import { find_existing_certs } from "../webdav-runner/certs.js"
 import pkg from "../webdav-runner/pkg.js"
 import { read_file } from "../webdav-runner/utils.js"
-import http from "http"
-import https from "https"
 
 export default config => {
     const certs = find_existing_certs(config)

@@ -1,5 +1,6 @@
-import { expand_path, json_loads, read_file } from "../webdav-runner/utils.js"
 import fs from "fs"
+
+import { expand_path, json_loads, read_file } from "../webdav-runner/utils.js"
 
 const default_config = {
     configuration: "~/.webdav-runner/config.json",

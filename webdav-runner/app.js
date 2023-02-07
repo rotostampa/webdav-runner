@@ -1,10 +1,3 @@
-import pkg from "../webdav-runner/pkg.js"
-import {
-    endswith,
-    ensure_dir,
-    expand_path,
-    startswith,
-} from "../webdav-runner/utils.js"
 import Bonjour from "bonjour"
 import { execFile as exec_file } from "child_process"
 import express from "express"
@@ -12,6 +5,14 @@ import httpproxy from "http-proxy"
 import jwt from "jsonwebtoken"
 import machine_id from "node-machine-id"
 import { v2 as webdav } from "webdav-server"
+
+import pkg from "../webdav-runner/pkg.js"
+import {
+    endswith,
+    ensure_dir,
+    expand_path,
+    startswith,
+} from "../webdav-runner/utils.js"
 
 const PERMISSIONS = {
     read: [
