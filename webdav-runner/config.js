@@ -35,6 +35,7 @@ const default_config = {
         port: 1923,
         type: "webdav-runner",
         name: null,
+        host: null
     },
     execute: {
         secret: "my-super-secret",

@@ -51,11 +51,14 @@ const SERVICES = {
 }
 
 function bonjour_advertise(config) {
+
+    const name = config.bonjour.name || machine_id.machineIdSync({ original: true })
+
     const settings = {
-        name:
-            config.bonjour.name || machine_id.machineIdSync({ original: true }),
+        name: name,
         type: config.bonjour.type,
         port: config.bonjour.port,
+        host: config.bonjour.host || `webdav-${name}.local`,
         txt: {
             platform: process.platform,
             port: config.proxy.port || config.http.port,
