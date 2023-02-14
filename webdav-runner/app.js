@@ -64,11 +64,12 @@ const SERVICES = {
                 PERMISSIONS[perm]
             )
         }
+        return target
     },
     temp: ({ path, mount, permissions, cleanup }, extra) =>
         SERVICES.filesystem(
             {
-                mount: expand_path(os.tmpdir(), mount || get_machine_id()),
+                mount: expand_path(os.tmpdir(), mount || `webdav-runner-${get_machine_id()}`),
                 path,
                 permissions,
                 cleanup,
@@ -137,7 +138,7 @@ export default config => {
             settings.tags = [settings.type]
         }
 
-        SERVICES[settings.type](settings, context)
+        settings.mount = SERVICES[settings.type](settings, context)
 
         delete settings.cleanup
     }
