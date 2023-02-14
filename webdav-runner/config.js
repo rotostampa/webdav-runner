@@ -22,13 +22,22 @@ const default_config = {
                 path: "/",
                 mount: "~/Storage",
                 type: "filesystem",
-                tags: ["session"],
+                tags: ["filesystem"],
                 permissions: {
                     admin: "write",
                     user: "read",
                 },
                 cleanup: false,
             },
+            temp: {
+                path: '/temp',
+                tags: ["temp"],
+                permissions: {
+                    admin: "write",
+                    user: "read",
+                },
+                cleanup: false,
+            }
         },
     },
     bonjour: {
@@ -69,6 +78,7 @@ const traverse_config = (configs, keys) => {
             return result
         }
     }
+    return null
 }
 
 const dump_config = (...configs) => {
