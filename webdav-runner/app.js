@@ -4,6 +4,7 @@ import express from "express"
 import httpproxy from "http-proxy"
 import jwt from "jsonwebtoken"
 import machine_id from "node-machine-id"
+import os from "os"
 import { v2 as webdav } from "webdav-server"
 
 import pkg from "../webdav-runner/pkg.js"
@@ -34,12 +35,28 @@ const PERMISSIONS = {
     write: ["all"],
 }
 
+const get_machine_id = () => machine_id.machineIdSync({ original: true })
+
 const SERVICES = {
     filesystem: (
-        { path, mount, permissions },
-        { server, users, privilege_manager }
+        { path, mount, permissions, cleanup },
+        { server, users, privilege_manager, config }
     ) => {
-        server.setFileSystem(path, new webdav.PhysicalFileSystem(mount))
+        const target = ensure_dir(
+            ...(mount
+                ? [mount]
+                : [
+                      expand_path(
+                          config.webdav.storage,
+                          `${config.http.port}`,
+                          `${config.bonjour.port}`
+                      ),
+                      path.replace("/", "-"),
+                  ]),
+            cleanup
+        )
+
+        server.setFileSystem(path, new webdav.PhysicalFileSystem(target))
         for (const [username, perm] of Object.entries(permissions || {})) {
             privilege_manager.setRights(
                 users[username],
@@ -48,11 +65,20 @@ const SERVICES = {
             )
         }
     },
+    temp: ({ path, mount, permissions, cleanup }, extra) =>
+        SERVICES.filesystem(
+            {
+                mount: expand_path(os.tmpdir(), mount || get_machine_id()),
+                path,
+                permissions,
+                cleanup,
+            },
+            extra
+        ),
 }
 
 function bonjour_advertise(config) {
-
-    const name = config.bonjour.name || machine_id.machineIdSync({ original: true })
+    const name = config.bonjour.name || get_machine_id()
 
     const settings = {
         name: name,
@@ -86,12 +112,6 @@ export default config => {
         users[username] = user_manager.addUser(username, password, false)
     }
 
-    const temp = expand_path(
-        config.webdav.storage,
-        `${config.http.port}`,
-        `${config.bonjour.port}`
-    )
-
     const server = new webdav.WebDAVServer({
         httpAuthentication: new webdav.HTTPBasicAuthentication(
             user_manager,
@@ -116,13 +136,6 @@ export default config => {
         if (!settings.tags) {
             settings.tags = [settings.type]
         }
-
-        settings.mount = ensure_dir(
-            settings.mount
-                ? settings.mount
-                : [temp, settings.path.replace("/", "-")],
-            settings.cleanup
-        )
 
         SERVICES[settings.type](settings, context)
 
@@ -155,7 +168,7 @@ export default config => {
         )
         res.set(
             "Access-Control-Allow-Headers",
-            "Accept, Authorization, Content-Type, Content-Length, Depth, X-Requested-With"
+            "Accept, Authorization, Content-Type, Content-Length, Depth, X-Requested-With, Origin, User-Agent, X-Requested-With"
         )
 
         // proxy logic

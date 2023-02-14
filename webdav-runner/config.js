@@ -30,21 +30,22 @@ const default_config = {
                 cleanup: false,
             },
             temp: {
-                path: '/temp',
+                path: "/temp",
                 tags: ["temp"],
+                type: "temp",
                 permissions: {
                     admin: "write",
                     user: "read",
                 },
                 cleanup: false,
-            }
+            },
         },
     },
     bonjour: {
         port: 1923,
         type: "webdav-runner",
         name: null,
-        host: null
+        host: null,
     },
     execute: {
         secret: "my-super-secret",
