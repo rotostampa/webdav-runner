@@ -30,7 +30,7 @@ const default_config = {
                 cleanup: false,
             },
             temp: {
-                path: "/temp",
+                path: "/.temp",
                 tags: ["temp"],
                 type: "temp",
                 permissions: {
