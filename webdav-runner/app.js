@@ -169,7 +169,7 @@ export default config => {
         )
         res.set(
             "Access-Control-Allow-Headers",
-            "Accept, Authorization, Content-Type, Content-Length, Depth, X-Requested-With, Origin, User-Agent, X-Requested-With"
+            "Accept, Authorization, Content-Type, Content-Length, Depth, X-Requested-With, Origin, User-Agent, X-Requested-With, Destination"
         )
 
         // proxy logic

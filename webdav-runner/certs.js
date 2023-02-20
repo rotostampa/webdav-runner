@@ -13,6 +13,7 @@ const make_alt_names = config => {
     const domains = {}
 
     for (let d of [
+        "127.0.0.1",
         "localhost",
         "localtest.me",
         "*.localtest.me",
