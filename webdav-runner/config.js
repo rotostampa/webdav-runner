@@ -50,6 +50,9 @@ const default_config = {
     execute: {
         secret: "my-super-secret",
     },
+    open: {
+        secret: "my-super-secret",
+    },
     proxy: {
         domain: "localtest.me",
         prefix: "webdav-",

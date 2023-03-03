@@ -56,7 +56,9 @@ const SERVICES = {
             cleanup
         )
 
-        server.setFileSystem(path, new webdav.PhysicalFileSystem(target))
+        const pfs = new webdav.PhysicalFileSystem(target)
+
+        server.setFileSystem(path, pfs)
         for (const [username, perm] of Object.entries(permissions || {})) {
             privilege_manager.setRights(
                 users[username],
@@ -64,12 +66,16 @@ const SERVICES = {
                 PERMISSIONS[perm]
             )
         }
+
         return target
     },
     temp: ({ path, mount, permissions, cleanup }, extra) =>
         SERVICES.filesystem(
             {
-                mount: expand_path(os.tmpdir(), mount || `webdav-runner-${get_machine_id()}`),
+                mount: expand_path(
+                    os.tmpdir(),
+                    mount || `webdav-runner-${get_machine_id()}`
+                ),
                 path,
                 permissions,
                 cleanup,
@@ -231,49 +237,74 @@ export default config => {
         })
     })
 
+    const execute_command = (command, args, res) => {
+        console.info("🚀 running", command, ...args)
+        exec_file(
+            command || "/bin/hostname",
+            args || [],
+            (error, stdout, stderr) => {
+                res.status(error ? 422 : 200)
+                res.send({
+                    success: error ? false : true,
+                    status: error ? 422 : 200,
+                    error,
+                    stdout,
+                    stderr,
+                })
+
+                console.info("🚀 running complete:", command, ...args)
+
+                if (error) console.error(error)
+                if (stderr) console.warn(stderr)
+                if (stdout) console.log(stdout)
+            }
+        )
+    }
+
+    const execute_jwt = (req, res, callback) => {
+        let result
+        try {
+            result = jwt.verify(req.params.jwt, config.execute.secret)
+        } catch (e) {
+            console.info("invalid jwt", e)
+        }
+
+        if (!result) {
+            res.status(401)
+            res.send({ success: false, status: 401 })
+        } else {
+            callback(result)
+        }
+    }
+
     if (config.execute.secret) {
-        //console.info("sample jwt request")
-        //console.info(`curl https://localhost:${settings.port}/execute/${jwt.sign({ command: "npm", arguments: ["install", '-g', 'webdav-runner@latest'] }, jwt_secret)}/ --insecure`)
+        //console.info("sample command jwt request")
+        //console.info(`curl https://127.0.0.1:${config.http.port}/execute/${jwt.sign({ command: "say", arguments: ["hello"] }, config.execute.secret)}/ --insecure`)
 
-        app.get("/execute/:jwt", (req, res) => {
-            let result
-            try {
-                result = jwt.verify(req.params.jwt, config.execute.secret)
-            } catch (e) {
-                console.info("invalid jwt", e)
-            }
+        app.get("/execute/:jwt", (req, res) =>
+            execute_jwt(req, res, result =>
+                execute_command(result.command, result.arguments, res)
+            )
+        )
+    }
 
-            if (!result) {
-                res.status(401)
-                res.send({ success: false, status: 401 })
-            } else {
-                console.info("🚀 running", result.command, ...result.arguments)
-                exec_file(
-                    result.command || "/bin/hostname",
-                    result.arguments || [],
-                    (error, stdout, stderr) => {
-                        res.status(error ? 422 : 200)
-                        res.send({
-                            success: error ? false : true,
-                            status: error ? 422 : 200,
-                            error,
-                            stdout,
-                            stderr,
-                        })
+    if (config.open.secret) {
+        //console.info("sample open jwt request")
+        //console.info(`curl https://127.0.0.1:${config.http.port}/open/${jwt.sign({ path: '/' }, config.execute.secret)}/ --insecure`)
 
-                        console.info(
-                            "🚀 running complete:",
-                            result.command,
-                            ...result.arguments
+        app.get("/open/:jwt", (req, res) =>
+            execute_jwt(req, res, result =>
+                server.getFileSystem(
+                    new webdav.Path(result.path || "/"),
+                    (fs, _, sub) =>
+                        execute_command(
+                            "/usr/bin/open",
+                            [fs.getRealPath(sub).realPath],
+                            res
                         )
-
-                        if (error) console.error(error)
-                        if (stderr) console.warn(stderr)
-                        if (stdout) console.log(stdout)
-                    }
                 )
-            }
-        })
+            )
+        )
     }
 
     app.use(webdav.extensions.express("/", server))
