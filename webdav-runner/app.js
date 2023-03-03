@@ -85,6 +85,9 @@ const SERVICES = {
 }
 
 function bonjour_advertise(config) {
+
+    if (config.bonjour) return {}
+
     const name = config.bonjour.name || get_machine_id()
 
     const settings = {
@@ -151,7 +154,7 @@ export default config => {
 
     const servers = {}
 
-    Bonjour().find({ type: config.bonjour.type }, e => {
+    if (config.bonjour) Bonjour().find({ type: config.bonjour.type }, e => {
         delete e.rawTxt
         servers[e.name] = {
             proxy: `${e.txt.protocol}://${config.proxy.prefix}${e.name}${config.proxy.domain}:${e.txt.port}/`,
@@ -178,41 +181,6 @@ export default config => {
             "Accept, Authorization, Content-Type, Content-Length, Depth, X-Requested-With, Origin, User-Agent, X-Requested-With, Destination"
         )
 
-        // proxy logic
-        if (
-            req.hostname &&
-            endswith(req.hostname, config.proxy.domain) &&
-            startswith(req.hostname, config.proxy.prefix)
-        ) {
-            const proxyname = req.hostname.slice(
-                config.proxy.prefix.length,
-                -config.proxy.domain.length
-            )
-
-            const target = servers[proxyname]
-
-            if (target && proxyname == bonjour.name) {
-                console.info("proxy to self, skipping")
-            } else if (target) {
-                const url = `${target.txt.protocol}://${target.address}:${target.port}${req.path}`
-                console.info("forwarding to", url)
-                proxy.web(req, res, { target: url }, e => {
-                    res.status(502)
-                    res.send({
-                        success: false,
-                        status: 502,
-                        error: `${e}`,
-                        url: url,
-                    })
-                })
-                return
-            } else {
-                res.status(404)
-                res.send({ success: false, status: 404, servers: servers })
-                return
-            }
-        }
-
         next()
         const protocol = config.http.secure ? "https" : "http"
 
@@ -222,6 +190,51 @@ export default config => {
             `${protocol}://${req.hostname}:${config.http.port}${req.path}`
         )
     })
+
+
+    if (config.proxy) {
+
+
+        app.use((req, res, next) => {
+
+            // proxy logic
+            if (
+                req.hostname &&
+                endswith(req.hostname, config.proxy.domain) &&
+                startswith(req.hostname, config.proxy.prefix)
+            ) {
+                const proxyname = req.hostname.slice(
+                    config.proxy.prefix.length,
+                    -config.proxy.domain.length
+                )
+
+                const target = servers[proxyname]
+
+                if (target && proxyname == bonjour.name) {
+                    console.info("proxy to self, skipping")
+                } else if (target) {
+                    const url = `${target.txt.protocol}://${target.address}:${target.port}${req.path}`
+                    console.info("forwarding to", url)
+                    proxy.web(req, res, { target: url }, e => {
+                        res.status(502)
+                        res.send({
+                            success: false,
+                            status: 502,
+                            error: `${e}`,
+                            url: url,
+                        })
+                    })
+                    return
+                } else {
+                    res.status(404)
+                    res.send({ success: false, status: 404, servers: servers })
+                    return
+                }
+            }
+            next()
+        })
+    }
+
 
     app.get("/manifest", (req, res) => {
         res.set("Cache-Control", "max-age=3600")
