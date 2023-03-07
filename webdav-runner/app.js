@@ -247,6 +247,11 @@ export default config => {
             name: bonjour.name,
             folders: config.webdav.folders,
             servers,
+            capabilities: {
+                proxy:   config.proxy ? true : false,
+                execute: config.execute ? true : false,
+                open:    config.open ? true : false,
+            }
         })
     })
 
