@@ -306,9 +306,18 @@ export default config => {
         )
     }
 
-    if (config.open.secret) {
+    const open_commands = {
+        darwin: '/usr/bin/open',
+        linux: 'open',
+        win32: 'start'
+    }
+    const open_command = open_commands[os.platform()]
+
+    if (config.open.secret && open_command) {
         //console.info("sample open jwt request")
         //console.info(`curl https://127.0.0.1:${config.http.port}/open/${jwt.sign({ path: '/' }, config.execute.secret)}/ --insecure`)
+
+
 
         app.get("/open/:jwt", (req, res) =>
             execute_jwt(req, res, result =>
@@ -316,7 +325,7 @@ export default config => {
                     new webdav.Path(result.path || "/"),
                     (fs, _, sub) =>
                         execute_command(
-                            "/usr/bin/open",
+                            open_command,
                             [fs.getRealPath(sub).realPath],
                             res
                         )
